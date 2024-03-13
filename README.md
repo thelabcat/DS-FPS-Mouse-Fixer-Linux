@@ -11,7 +11,7 @@ Like the original, set N and M as the left and right shoulder buttons respective
 You can change the key bindings in the KEYBINDINGS dictionary, but beware that you cannot specify left or right shift or control. Also beware that for some reason the unmaintained keyboard library detects H as Backspace on my system.
 There are some other key binding absolute variables, generally not meant to be altered, lower down in the configuration section of the script. Change the kill key, pause key, and left/right shoulder button use keys there.
 
-Backspace is configured as the kill key. Note that it immediately stops the program, even if the mouse button is still being virtually held down. Click once to send a mouse up event to your system after quitting.
+Backspace is configured as the kill key, like the original.
 
 This script should theoretically work on Windows, but I didn't test that.
 
