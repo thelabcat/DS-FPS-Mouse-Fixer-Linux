@@ -128,7 +128,8 @@ class MPHMousefix(object):
     
     def mainloop(self):
         """Start the program"""
-        keyboard.add_hotkey(KILL_KEY, quit) #Kill the program when this key is pressed, no matter what
+        self.running=True
+        keyboard.add_hotkey(KILL_KEY, self.kill) #Kill the program when this key is pressed, no matter what
         
         keyevents=keyboard.start_recording()[0] #Get a keyboard events queue
         
@@ -140,8 +141,8 @@ class MPHMousefix(object):
         last_hudcheck=0 #Time of last HUD check
         was_hud=False
         is_hud=False
-        
-        while True:
+
+        while self.running:
             if not self.multiplayer and time.time()-last_hudcheck>IS_HUD_INTERVAL:
                 last_hudcheck=time.time()
                 is_hud=self.get_is_hud()
@@ -183,7 +184,16 @@ class MPHMousefix(object):
                     exec("self."+MOUSEBINDS[e.button]+"(e)") #Run one of our three mouse bound functions
                     
             self.mousewrap(*self.abs_to_rel(*mouse.get_position())) #Perform a mouse wrap enforcement check
-
+            
+    def kill(self):
+        """End the program."""
+        self.running=False
+        try:
+            pyautogui.mouseUp()
+            keyboard.stop_recording()
+        finally:
+            quit()
+    
     def weaponselect(self, weapon):
         """Select a weapon by index 1-6"""
         pyautogui.mouseUp()
