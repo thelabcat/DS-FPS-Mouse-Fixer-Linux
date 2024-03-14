@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH mouse fix for Linux, ver 1.0
+#MPH mouse fix for Linux, ver 1.2
 #S.D.G.
 
 """
@@ -182,8 +182,9 @@ class MPHMousefix(object):
                 e = mouseevents.get()
                 if type(e)==mouse.ButtonEvent and e.button in MOUSEBINDS.keys():
                     exec("self."+MOUSEBINDS[e.button]+"(e)") #Run one of our three mouse bound functions
-                    
-            self.mousewrap(*self.abs_to_rel(*mouse.get_position())) #Perform a mouse wrap enforcement check
+
+            if not mouse.is_pressed(): #Give up wrap if mouse is actually held down
+                self.mousewrap(*self.abs_to_rel(*mouse.get_position())) #Perform a mouse wrap enforcement check
             
     def kill(self):
         """End the program."""
@@ -223,27 +224,31 @@ class MPHMousefix(object):
         """Check if the mouse needs wrapping and perform if needed"""
         changed = False #Only give a mouse move command if at least one axis value needs changing
 
+        #Default to centering the non wrapped axis
+        new_x = TOUCH_CENTER[0]
+        new_y = TOUCH_CENTER[1]
+
         #Wrap X
         if x < MOUSE_DRAG_AREA_X[0] + MOUSE_DRAG_MARGIN:
-            x = MOUSE_DRAG_AREA_X[1] - MOUSE_DROP_MARGIN
+            new_x = MOUSE_DRAG_AREA_X[1] - MOUSE_DROP_MARGIN
             changed = True
         elif x > MOUSE_DRAG_AREA_X[1] - MOUSE_DRAG_MARGIN:
-            x = MOUSE_DRAG_AREA_X[0] + MOUSE_DROP_MARGIN
+            new_x = MOUSE_DRAG_AREA_X[0] + MOUSE_DROP_MARGIN
             changed = True
 
         #Wrap Y
         if y < MOUSE_DRAG_AREA_Y[0] + MOUSE_DRAG_MARGIN:
-            y = MOUSE_DRAG_AREA_Y[1] - MOUSE_DROP_MARGIN
+            new_y = MOUSE_DRAG_AREA_Y[1] - MOUSE_DROP_MARGIN
             changed = True
         elif y > MOUSE_DRAG_AREA_Y[1] - MOUSE_DRAG_MARGIN:
-            y = MOUSE_DRAG_AREA_Y[0] + MOUSE_DROP_MARGIN
+            new_y = MOUSE_DRAG_AREA_Y[0] + MOUSE_DROP_MARGIN
             changed = True
 
         if changed:
             print("Wrapping mouse")
             pyautogui.mouseUp()
             time.sleep(MOUSE_RESET_WAIT)
-            self.goto_relative(x, y)
+            self.goto_relative(new_x, new_y)
             pyautogui.mouseDown()
 
     def rel_to_abs(self, x, y):
