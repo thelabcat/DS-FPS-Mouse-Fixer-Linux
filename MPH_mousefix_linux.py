@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH mouse fix for Linux, ver 1.3
+#MPH mouse fix for Linux, ver 1.4
 #S.D.G.
 
 """
@@ -33,7 +33,8 @@ TOUCH_CENTER = SCALE[0]//2, SCALE[1]//2
 MOUSE_RESET_WAIT = 35/1000 #pertains to the time before the mouse moves again, adjust this if your camera keeps jerking when your cursor is reset to center.
 BUTTON_WAIT = 120/1000 #pertains to the time before the mouse moves after pressing a button, adjust this if you get ghost inputs (buttons not properly pressed).
 KEY_WAIT = 50/1000 #pertains to the time between key inputs, this is used for some macros such as sprinting and crouching in the COD Games, adjust this if those inputs are not caught.
-IS_HUD_INTERVAL=1
+HUD_CHECK_INTERVAL = 1 #How often to check if Samus's HUD is shown
+PAUSE_INTERVAL = 0.1 #How often to run the pause loop
 
 #Limits of where to wrap the mouse
 MOUSE_DRAG_AREA_X = (0, SCALE[0])
@@ -161,11 +162,29 @@ class MPHMousefix(object):
         self.reset_mouse()
         
         last_hudcheck=0 #Time of last HUD check
-        was_hud=False
-        is_hud=False
+        was_hud=True
+        is_hud=True
+        is_paused=False
 
         while self.running:
-            if not self.multiplayer and time.time()-last_hudcheck>IS_HUD_INTERVAL:
+            if is_paused:
+                while not keyevents.empty():
+                    e = keyevents.get()
+                    if e.event_type == "down" and e.name == PAUSE_KEY:
+                        is_paused = not is_paused
+                            
+                while not mouseevents.empty(): #Clear mouse events queue while waiting to unpause
+                    mouseevents.get()
+                    
+                if not is_paused: #We were unpaused in this check
+                    self.reset_mouse()
+                    print("Resumed.")
+                else: #We are still paused, so wait and continue
+                    time.sleep(PAUSE_INTERVAL)
+                    continue
+
+            #If we are in singleplayer and it has been more than HUD_CHECK_INTERVAL seconds since we last checked for Samus's HUD...
+            if not self.multiplayer and time.time()-last_hudcheck>HUD_CHECK_INTERVAL:
                 last_hudcheck=time.time()
                 is_hud=self.get_is_hud()
                 if not was_hud and is_hud:
@@ -176,7 +195,14 @@ class MPHMousefix(object):
                     pyautogui.mouseUp()
                 was_hud=is_hud
                 if not is_hud:
-                    time.sleep(IS_HUD_INTERVAL)
+                    time.sleep(HUD_CHECK_INTERVAL)
+
+                    #Clear mouse and keyboard events while paused
+                    while not keyevents.empty():
+                        keyevents.get()
+                    while not mouseevents.empty():
+                        mouseevents.get()
+                    
                     continue
                 
             if not keyevents.empty(): #Do not hold the loop waiting for a keyboard event
@@ -197,11 +223,8 @@ class MPHMousefix(object):
                 elif e.name == PAUSE_KEY: #Pause the mouse fix
                     print("Paused")
                     pyautogui.mouseUp(_pause = False)
-                    keyboard.wait(PAUSE_KEY)
-                    while not keyevents.empty():
-                        keyevents.get()
-                    print("Resumed")
-                    self.reset_mouse()
+                    is_paused=True
+                    continue
                         
             if not mouseevents.empty(): #Do not hold the loop waiting for a mouse event
                 e = mouseevents.get()
