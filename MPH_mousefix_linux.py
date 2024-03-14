@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH mouse fix for Linux, ver 1.4
+#MPH mouse fix for Linux, ver 1.5
 #S.D.G.
 
 """
@@ -49,6 +49,7 @@ MOUSE_DRAG_AREA_CENTER = sum(MOUSE_DRAG_AREA_X)//2, sum(MOUSE_DRAG_AREA_Y)//2 #C
 BOOST_SWIPE_SIZE = 400 #The pixel length a boost swipe must be for the ROM to recognize it
 
 IS_HUD_COORDS = (MOUSE_DRAG_MARGIN, SCALE[1] - MOUSE_DRAG_MARGIN) #Coordinates to check for color match if we are in HUD or in the ship
+IS_MORPHBALL_COORDS = (800, 530) #Coordinates to check if we are in morphball mode or not
 VARIA_ORANGE = 211, 154, 73 #Color of varia components in HUD
 COLOR_TOLERANCE = 10
 
@@ -123,7 +124,7 @@ ZOOMOUT_KEY="m" #What key the emulator has set for the R shoulder
 class MPHMousefix(object):
     def __init__(self, run=True, multiplayer=False):
         """MouseFix for Metroid Prime: Hunters"""
-        self.multiplayer=multiplayer #Use the Varia HUD detector to pause the mouse fix if we are inside the ship ONLY if NOT in multiplayer
+        self.multiplayer=multiplayer #Use the Varia HUD detector ONLY if we are NOT in multiplayer, because the colors there could be different
         
         if not run: #Do not start the mouse fix unless run is True
             return
@@ -148,6 +149,10 @@ class MPHMousefix(object):
     def get_is_hud(self):
         """Are we in the Varia HUD, not in the ship? Does not work in weapon select"""
         return pyautogui.pixelMatchesColor(*self.rel_to_abs(*IS_HUD_COORDS), VARIA_ORANGE, COLOR_TOLERANCE)
+
+    def get_is_morphball(self):
+        """Are we in morphball mode, not standing? Assumes we are in the Varia HUD"""
+        return pyautogui.pixelMatchesColor(*self.rel_to_abs(*IS_MORPHBALL_COORDS), VARIA_ORANGE, COLOR_TOLERANCE)
     
     def mainloop(self):
         """Start the program"""
@@ -268,6 +273,12 @@ class MPHMousefix(object):
         """Press or release the zoom out key"""
         #print("ZOOMOUT_KEY "+e.event_type)
         exec("pyautogui.key"+e.event_type.title()+"(ZOOMOUT_KEY)")
+        
+        if not self.multiplayer and self.get_is_morphball(): #Sacrifice steering for via-button boost ball
+            if e.event_type == "down":
+                pyautogui.mouseUp()
+            else:
+                self.reset_mouse()
 
     def boost_ball(self, e):
         """Perform a touch-based boost ball"""
