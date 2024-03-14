@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH mouse fix for Linux, ver 1.2
+#MPH mouse fix for Linux, ver 1.3
 #S.D.G.
 
 """
@@ -28,7 +28,7 @@ pyautogui.MINIMUM_SLEEP=0
 pyautogui.PAUSE=0
 
 SCALE = (900, 674) #Size of reference window
-TOUCH_CENTER = SCALE[0]/2, SCALE[1]/2 #Reset point for the mouse
+TOUCH_CENTER = SCALE[0]//2, SCALE[1]//2
 
 MOUSE_RESET_WAIT = 35/1000 #pertains to the time before the mouse moves again, adjust this if your camera keeps jerking when your cursor is reset to center.
 BUTTON_WAIT = 120/1000 #pertains to the time before the mouse moves after pressing a button, adjust this if you get ghost inputs (buttons not properly pressed).
@@ -42,9 +42,30 @@ MOUSE_DRAG_AREA_Y = (225, 495)
 MOUSE_DRAG_MARGIN = 5 #How close we can get to the edge before we wrap
 MOUSE_DROP_MARGIN = MOUSE_DRAG_MARGIN*2 #How far away from the other edge to drop the cursor when we wrap
 
-IS_HUD_COORDS = (MOUSE_DRAG_MARGIN, SCALE[1]-MOUSE_DRAG_MARGIN) #Coordinates to check for color match if we are in HUD or in the ship
+#MOUSE_DRAG_AREA_SQSIZE = min((MOUSE_DRAG_AREA_X[1]-MOUSE_DRAG_AREA_X[0], MOUSE_DRAG_AREA_Y[1]-MOUSE_DRAG_AREA_Y[0])) #Edge size of a square area that we can drag in, currently for boost ball
+MOUSE_DRAG_AREA_CENTER = sum(MOUSE_DRAG_AREA_X)//2, sum(MOUSE_DRAG_AREA_Y)//2 #Center of draggable area
+
+BOOST_SWIPE_SIZE = 400 #The pixel length a boost swipe must be for the ROM to recognize it
+
+IS_HUD_COORDS = (MOUSE_DRAG_MARGIN, SCALE[1] - MOUSE_DRAG_MARGIN) #Coordinates to check for color match if we are in HUD or in the ship
 VARIA_ORANGE = 211, 154, 73 #Color of varia components in HUD
 COLOR_TOLERANCE = 10
+
+#Keys that the DS emulator is set to interpret as D-pad
+DPAD_KEYS = {"w":"UP",
+             "s":"DOWN",
+             "d":"RIGHT",
+             "a":"LEFT"
+             }
+
+#Direction names as mapped to screen coordinate factors
+DIRECTIONS = {"UP":(0, -1),
+              "DOWN":(0, 1),
+              "RIGHT":(1, 0),
+              "LEFT":(-1, 0)
+              }
+
+DEFAULT_BB_DIRECTION = "UP" #Default direction to touch-based boost ball in
 
 #Most key bindings
 KEYBINDS = {'q': 'MAIN_WEAPON',
@@ -56,7 +77,8 @@ KEYBINDS = {'q': 'MAIN_WEAPON',
             'x': 'OK',
             'v': 'YES',
             'b': 'NO',
-            'ctrl': 'MORPH_BALL'
+            'ctrl': 'MORPH_BALL',
+            'tab': 'BOOST_BALL'
             }
     
 TOUCHBUTTONS = { #Each button's position, and how long to press it
@@ -163,7 +185,10 @@ class MPHMousefix(object):
                     continue
                 if e.name in KEYBINDS.keys(): #Deals with keys in the key bindings configuration
                     print(KEYBINDS[e.name])
-                    self.touchbutton(TOUCHBUTTONS[KEYBINDS[e.name]]) #Push the button associated with the keybinding
+                    try:
+                        self.touchbutton(TOUCHBUTTONS[KEYBINDS[e.name]]) #Push the button associated with the keybinding
+                    except KeyError: #Not a regular touchbutton
+                        exec("self."+KEYBINDS[e.name].lower()+"(e)")
                     
                 elif e.name.isnumeric() and 0 < int(e.name) <= len(WEAPONSELECT_BUTTONS): #Pressed a number key, is in range of weapons
                     print("Weapon %i selected" % int(e.name))
@@ -171,7 +196,7 @@ class MPHMousefix(object):
                     
                 elif e.name == PAUSE_KEY: #Pause the mouse fix
                     print("Paused")
-                    pyautogui.mouseUp()
+                    pyautogui.mouseUp(_pause = False)
                     keyboard.wait(PAUSE_KEY)
                     while not keyevents.empty():
                         keyevents.get()
@@ -190,43 +215,75 @@ class MPHMousefix(object):
         """End the program."""
         self.running=False
         try:
-            pyautogui.mouseUp()
+            pyautogui.mouseUp(_pause = False)
             keyboard.stop_recording()
         finally:
             quit()
     
     def weaponselect(self, weapon):
         """Select a weapon by index 1-6"""
-        pyautogui.mouseUp()
+        pyautogui.mouseUp(_pause = False)
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(*TOUCHBUTTONS["WEAPON_SELECT"][0])
-        pyautogui.mouseDown()
+        pyautogui.mouseDown(_pause = False)
         time.sleep(TOUCHBUTTONS["WEAPON_SELECT"][1])
         self.goto_relative(*WEAPONSELECT_BUTTONS[weapon-1])
         time.sleep(BUTTON_WAIT)
-        pyautogui.mouseUp()
+        pyautogui.mouseUp(_pause = False)
         time.sleep(MOUSE_RESET_WAIT)
         self.reset_mouse()
 
     def fire(self, e):
         """Fire the gun, or stop firing"""
         if e.event_type=="down":
-            pyautogui.keyDown(FIRE_KEY)
+            pyautogui.keyDown(FIRE_KEY, _pause = False)
         else:
-            pyautogui.keyUp(FIRE_KEY)
-            pyautogui.mouseDown() #The mouse has been truly released, so simulate pressing it again
+            pyautogui.keyUp(FIRE_KEY, _pause = False)
+            pyautogui.mouseDown(_pause = False) #The mouse has been truly released, so simulate pressing it again
 
     def zoom_out(self, e):
         """Press or release the zoom out key"""
+        #print("ZOOMOUT_KEY "+e.event_type)
         exec("pyautogui.key"+e.event_type.title()+"(ZOOMOUT_KEY)")
+
+    def boost_ball(self, e):
+        """Perform a touch-based boost ball"""
+        pyautogui.mouseUp(_pause = False)
+        time.sleep(MOUSE_RESET_WAIT)
+        
+        direction=[0, 0]
+        
+        for key in DPAD_KEYS.keys(): #Sum input directions. If they contradict, they will zero out
+            if keyboard.is_pressed(key):
+                #print(key)
+                direction[0]+=DIRECTIONS[DPAD_KEYS[key]][0]
+                direction[1]+=DIRECTIONS[DPAD_KEYS[key]][1]
+                
+        if direction == [0, 0]: #If there is no direction or all input directions cancelled out, use the default
+            direction = DIRECTIONS[DEFAULT_BB_DIRECTION]
+
+        end_x = TOUCH_CENTER[0]+BOOST_SWIPE_SIZE//2*direction[0]
+        end_y = TOUCH_CENTER[1]+BOOST_SWIPE_SIZE//2*direction[1]
+
+        start_x = TOUCH_CENTER[0]-BOOST_SWIPE_SIZE/2*direction[0]
+        start_y = TOUCH_CENTER[1]-BOOST_SWIPE_SIZE//2*direction[1]
+        #print("Direction is", direction)
+        #print("Boost from ", start_x, start_y, "to", end_x, end_y)
+        self.goto_relative(start_x, start_y)
+        time.sleep(MOUSE_RESET_WAIT)
+        pyautogui.mouseDown(_pause = False)
+        time.sleep(MOUSE_RESET_WAIT)
+        self.goto_relative(end_x, end_y)
+        time.sleep(MOUSE_RESET_WAIT)
+        self.reset_mouse()
     
     def mousewrap(self, x, y):
         """Check if the mouse needs wrapping and perform if needed"""
         changed = False #Only give a mouse move command if at least one axis value needs changing
 
         #Default to centering the non wrapped axis
-        new_x = TOUCH_CENTER[0]
-        new_y = TOUCH_CENTER[1]
+        new_x = MOUSE_DRAG_AREA_CENTER[0]
+        new_y = MOUSE_DRAG_AREA_CENTER[1]
 
         #Wrap X
         if x < MOUSE_DRAG_AREA_X[0] + MOUSE_DRAG_MARGIN:
@@ -246,10 +303,10 @@ class MPHMousefix(object):
 
         if changed:
             print("Wrapping mouse")
-            pyautogui.mouseUp()
+            pyautogui.mouseUp(_pause = False)
             time.sleep(MOUSE_RESET_WAIT)
             self.goto_relative(new_x, new_y)
-            pyautogui.mouseDown()
+            pyautogui.mouseDown(_pause = False)
 
     def rel_to_abs(self, x, y):
         """Convert relative touch position to real screen position"""
@@ -266,18 +323,18 @@ class MPHMousefix(object):
 
     def touchbutton(self, button):
         """Push a touch button in form ((x, y), wait)"""
-        pyautogui.mouseUp()
+        pyautogui.mouseUp(_pause = False)
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(*button[0])
-        pyautogui.mouseDown()
+        pyautogui.mouseDown(_pause = False)
         time.sleep(button[1])
         self.reset_mouse()
                     
     def reset_mouse(self, e=None):
         """Reset the mouse to the center position"""
-        pyautogui.mouseUp()
+        pyautogui.mouseUp(_pause = False)
         time.sleep(MOUSE_RESET_WAIT)
-        self.goto_relative(*TOUCH_CENTER)
-        pyautogui.mouseDown()
+        self.goto_relative(*MOUSE_DRAG_AREA_CENTER)
+        pyautogui.mouseDown(_pause = False)
         
 mmf=MPHMousefix(multiplayer = "y" in input("Are you going into multiplayer? y/[N]: ").lower())
