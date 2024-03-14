@@ -6,6 +6,7 @@ Install the following Python libraries where root can see them. To achieve this,
 - PyAutoGUI: https://pypi.org/project/PyAutoGUI/
 - keyboard: https://pypi.org/project/keyboard/
 - mouse: https://pypi.org/project/mouse/
+
 Additionally, to use the HUD detector, you will also need to install whichever screenshot tool PyAutoGUI is configured to use. Python will tell you in a traceback if it's not available. Either scrot or gnome-screenshot. To avoid this installation and not use the HUD detector, always answer Y to the "Are you going into multiplayer?" prompt when the program starts.
 
 # Usage
