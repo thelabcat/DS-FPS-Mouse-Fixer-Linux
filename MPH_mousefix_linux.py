@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH mouse fix for Linux, ver 1.5
+#MPH mouse fix for Linux, ver 1.6
 #S.D.G.
 
 """
@@ -126,11 +126,9 @@ class MPHMousefix(object):
         """MouseFix for Metroid Prime: Hunters"""
         self.multiplayer=multiplayer #Use the Varia HUD detector ONLY if we are NOT in multiplayer, because the colors there could be different
         
-        if not run: #Do not start the mouse fix unless run is True
-            return
-        
         self.touch_offset, self.touch_size = self.get_touch_area()
-        self.mainloop()
+        if run: #Do not start the mouse fix unless run is True
+            self.mainloop()
         
     def get_touch_area(self):
         """Get the initial touch area and return touch_offset and touch_size"""
@@ -267,7 +265,10 @@ class MPHMousefix(object):
             pyautogui.keyDown(FIRE_KEY, _pause = False)
         else:
             pyautogui.keyUp(FIRE_KEY, _pause = False)
-            pyautogui.mouseDown(_pause = False) #The mouse has been truly released, so simulate pressing it again
+            if self.out_of_drag_bounds(*self.abs_to_rel(*mouse.get_position())) != (0, 0): #Mouse moved out of bounds while holding a charged shot
+                self.reset_mouse()
+            else:
+                pyautogui.mouseDown(_pause = False) #The mouse has been truly released, so simulate pressing it again
 
     def zoom_out(self, e):
         """Press or release the zoom out key"""
@@ -310,37 +311,24 @@ class MPHMousefix(object):
         self.goto_relative(end_x, end_y)
         time.sleep(MOUSE_RESET_WAIT)
         self.reset_mouse()
-    
+
+    def out_of_drag_bounds(self, x, y):
+        """Check if coordinates are out of dragging bounds, and return x, y tuple of sign of directions"""
+        return - (x < MOUSE_DRAG_AREA_X[0] + MOUSE_DRAG_MARGIN) + (x > MOUSE_DRAG_AREA_X[1] - MOUSE_DRAG_MARGIN), - (y < MOUSE_DRAG_AREA_Y[0] + MOUSE_DRAG_MARGIN) + (y > MOUSE_DRAG_AREA_Y[1] - MOUSE_DRAG_MARGIN)
+        
     def mousewrap(self, x, y):
         """Check if the mouse needs wrapping and perform if needed"""
-        changed = False #Only give a mouse move command if at least one axis value needs changing
+        oob = self.out_of_drag_bounds(x, y)
+        if oob == (0, 0):
+            return
 
-        #Default to centering the non wrapped axis
-        new_x = MOUSE_DRAG_AREA_CENTER[0]
-        new_y = MOUSE_DRAG_AREA_CENTER[1]
-
-        #Wrap X
-        if x < MOUSE_DRAG_AREA_X[0] + MOUSE_DRAG_MARGIN:
-            new_x = MOUSE_DRAG_AREA_X[1] - MOUSE_DROP_MARGIN
-            changed = True
-        elif x > MOUSE_DRAG_AREA_X[1] - MOUSE_DRAG_MARGIN:
-            new_x = MOUSE_DRAG_AREA_X[0] + MOUSE_DROP_MARGIN
-            changed = True
-
-        #Wrap Y
-        if y < MOUSE_DRAG_AREA_Y[0] + MOUSE_DRAG_MARGIN:
-            new_y = MOUSE_DRAG_AREA_Y[1] - MOUSE_DROP_MARGIN
-            changed = True
-        elif y > MOUSE_DRAG_AREA_Y[1] - MOUSE_DRAG_MARGIN:
-            new_y = MOUSE_DRAG_AREA_Y[0] + MOUSE_DROP_MARGIN
-            changed = True
-
-        if changed:
-            print("Wrapping mouse")
-            pyautogui.mouseUp(_pause = False)
-            time.sleep(MOUSE_RESET_WAIT)
-            self.goto_relative(new_x, new_y)
-            pyautogui.mouseDown(_pause = False)
+        print("Wrapping mouse")
+        pyautogui.mouseUp(_pause = False)
+        time.sleep(MOUSE_RESET_WAIT)
+        self.goto_relative(
+             (MOUSE_DRAG_AREA_X[1], MOUSE_DRAG_AREA_CENTER[0], MOUSE_DRAG_AREA_X[0])[oob[0] + 1] + MOUSE_DROP_MARGIN * oob[0],
+             (MOUSE_DRAG_AREA_Y[1], MOUSE_DRAG_AREA_CENTER[1], MOUSE_DRAG_AREA_Y[0])[oob[1] + 1] + MOUSE_DROP_MARGIN * oob[1])
+        pyautogui.mouseDown(_pause = False)
 
     def rel_to_abs(self, x, y):
         """Convert relative touch position to real screen position"""
