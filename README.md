@@ -2,6 +2,7 @@
 A Python-based Linux port of the Metroid Prime: Hunters component of https://github.com/JDoe212/DS-FPS-Mouse-Fixer
 
 ## Requirements:
+This script is tested and working with Python 3.12 on Fedora 39 x86 64.
 Install the following Python libraries. If on Linux, they must be where root can see them. To achieve that, I ran Pip (Python's package installer) as root, even though it's not recommended.
 - PyAutoGUI: https://pypi.org/project/PyAutoGUI/
 - keyboard: https://pypi.org/project/keyboard/
