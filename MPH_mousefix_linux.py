@@ -38,6 +38,7 @@ BUTTON_WAIT = 120/1000 #pertains to the time before the mouse moves after pressi
 KEY_WAIT = 50/1000 #pertains to the time between key inputs, this is used for some macros such as sprinting and crouching in the COD Games, adjust this if those inputs are not caught.
 HUD_CHECK_INTERVAL = 1 #How often to check if Samus's HUD is shown
 PAUSE_INTERVAL = 0.1 #How often to run the pause loop
+BUTTON_HOLD_INTERVAL = 0.05 #How often to rerun the mouse movement command to keep the cursor locked onto a button
 
 #Limits of where to wrap the mouse
 MOUSE_DRAG_AREA_X = (0, SCALE[0])
@@ -179,8 +180,7 @@ class MPHMousefix(object):
                     if e.event_type == "down" and e.name == PAUSE_KEY:
                         is_paused = not is_paused
                             
-                while not mouseevents.empty(): #Clear mouse events queue while waiting to unpause
-                    mouseevents.get()
+                self.clear_queue(mouseevents) #Clear mouse events queue while waiting to unpause
                     
                 if not is_paused: #We were unpaused in this check
                     self.reset_mouse()
@@ -204,10 +204,8 @@ class MPHMousefix(object):
                     time.sleep(HUD_CHECK_INTERVAL)
 
                     #Clear mouse and keyboard events while paused
-                    while not keyevents.empty():
-                        keyevents.get()
-                    while not mouseevents.empty():
-                        mouseevents.get()
+                    for q in (keyevents, mouseevents):
+                        self.clear_queue(q)
                     
                     continue
                 
@@ -239,6 +237,11 @@ class MPHMousefix(object):
 
             if not mouse.is_pressed(): #Give up wrap if mouse is actually held down
                 self.mousewrap(*self.abs_to_rel(*mouse.get_position())) #Perform a mouse wrap enforcement check
+
+    def clear_queue(self, q):
+        """Clears the passed queue"""
+        while not q.empty():
+            q.get()
             
     def kill(self):
         """End the program."""
@@ -279,7 +282,7 @@ class MPHMousefix(object):
         if e.event_type == "down":
             pyautogui.keyDown(ZOOMOUT_KEY, _pause = False)
         elif e.event_type == "up":
-            pyautogui.keyDown(ZOOMOUT_KEY, _pause = False)
+            pyautogui.keyUp(ZOOMOUT_KEY, _pause = False)
 
         if not self.multiplayer and self.get_is_morphball(): #Sacrifice steering for via-button boost ball
             if e.event_type == "down":
@@ -355,7 +358,12 @@ class MPHMousefix(object):
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(*button[0])
         pyautogui.mouseDown(_pause = False)
-        time.sleep(button[1])
+
+        for i in range(int(button[1] / BUTTON_HOLD_INTERVAL)): #Lock the mouse onto the button by constantly moving back to it
+            time.sleep(BUTTON_HOLD_INTERVAL)
+            self.goto_relative(*button[0])
+        time.sleep(button[1] % BUTTON_HOLD_INTERVAL)
+
         self.reset_mouse()
                     
     def reset_mouse(self, e=None):
