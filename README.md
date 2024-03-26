@@ -1,14 +1,16 @@
 # MPH-DS-mouse-fixer-linux
 A Python-based Linux port of the Metroid Prime: Hunters component of https://github.com/JDoe212/DS-FPS-Mouse-Fixer
+This program was tested with Python 3.12 on Fedora 39 x64.
 
 ## Requirements:
 This script is tested and working with Python 3.12 on Fedora 39 x86 64.
 Install the following Python libraries. If on Linux, they must be where root can see them. To achieve that, I ran Pip (Python's package installer) as root, even though it's not recommended.
 - PyAutoGUI: https://pypi.org/project/PyAutoGUI/
-- keyboard: https://pypi.org/project/keyboard/
-- mouse: https://pypi.org/project/mouse/
+- Pillow: https://pypi.org/project/pillow/
+- Keyboard: https://pypi.org/project/keyboard/
+- Mouse: https://pypi.org/project/mouse/
 
-Additionally, to use the HUD detection features, you will also need to install whichever screenshot tool PyAutoGUI is configured to use. Python will tell you in a traceback if it's not available. Either scrot or gnome-screenshot. To avoid this installation and not use the HUD detector, always answer Y to the "Are you going into multiplayer?" prompt when the program starts.
+Additionally, to use the HUD detection features on Linux, you will also need to install whichever screenshot tool PyAutoGUI is configured to use. Python will tell you in a traceback if it's not available. Either scrot or gnome-screenshot. To avoid this installation and not use the HUD detector, always answer Y to the "Are you going into multiplayer?" prompt when the program starts.
 
 ## Usage
 ### Emulator configuration:

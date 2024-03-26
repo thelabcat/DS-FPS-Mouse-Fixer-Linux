@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH mouse fix for Linux, ver 1.6
+#MPH mouse fix for Linux, ver 1.7
 #S.D.G.
 
 """
@@ -26,6 +26,7 @@ import queue
 pyautogui.MINIMUM_DURATION=0
 pyautogui.MINIMUM_SLEEP=0
 pyautogui.PAUSE=0
+pyautogui.FAILSAFE=False
 
 SCALE = (900, 674) #Size of reference window
 TOUCH_CENTER = SCALE[0]//2, SCALE[1]//2
@@ -273,12 +274,15 @@ class MPHMousefix(object):
     def zoom_out(self, e):
         """Press or release the zoom out key"""
         #print("ZOOMOUT_KEY "+e.event_type)
-        exec("pyautogui.key"+e.event_type.title()+"(ZOOMOUT_KEY)")
-        
+        if e.event_type == "down":
+            pyautogui.keyDown(ZOOMOUT_KEY, _pause = False)
+        elif e.event_type == "up":
+            pyautogui.keyDown(ZOOMOUT_KEY, _pause = False)
+
         if not self.multiplayer and self.get_is_morphball(): #Sacrifice steering for via-button boost ball
             if e.event_type == "down":
                 pyautogui.mouseUp()
-            else:
+            elif e.event_type == "up":
                 self.reset_mouse()
 
     def boost_ball(self, e):
@@ -332,7 +336,7 @@ class MPHMousefix(object):
 
     def rel_to_abs(self, x, y):
         """Convert relative touch position to real screen position"""
-        return self.touch_offset[0]+x/SCALE[0]*self.touch_size[0], self.touch_offset[1]+y/SCALE[1]*self.touch_size[1]
+        return int(self.touch_offset[0]+x/SCALE[0]*self.touch_size[0]), int(self.touch_offset[1]+y/SCALE[1]*self.touch_size[1])
     
     def abs_to_rel(self, x, y):
         """Convert real screen position to relative touch position"""
