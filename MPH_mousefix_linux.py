@@ -26,6 +26,8 @@ import queue
 pyautogui.MINIMUM_DURATION=0
 pyautogui.MINIMUM_SLEEP=0
 pyautogui.PAUSE=0
+
+#Disable failsafe that kills the program if the mouse goes into the corner of the screen, as this can be a problem in fullscreen emulators
 pyautogui.FAILSAFE=False
 
 SCALE = (900, 674) #Size of reference window
@@ -345,7 +347,7 @@ class MPHMousefix(object):
     def goto_relative(self, x, y):
         """Move the mouse cursor to a relative touch position"""
         #mouse.move(*self.rel_to_abs(x, y))
-        pyautogui.moveTo(*self.rel_to_abs(x, y), _pause=False)
+        pyautogui.moveTo(*self.rel_to_abs(x, y))
 
     def touchbutton(self, button):
         """Push a touch button in form ((x, y), wait)"""
