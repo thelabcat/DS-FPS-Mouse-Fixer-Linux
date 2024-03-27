@@ -1,6 +1,5 @@
 # MPH-DS-mouse-fixer-linux
 A Python-based Linux port of the Metroid Prime: Hunters component of https://github.com/JDoe212/DS-FPS-Mouse-Fixer
-This program was tested with Python 3.12 on Fedora 39 x64.
 
 ## Requirements:
 This script is tested and working with Python 3.12 on Fedora 39 x86 64.
