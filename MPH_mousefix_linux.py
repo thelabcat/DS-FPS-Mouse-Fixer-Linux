@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH mouse fix for Linux, ver 1.7
+#MPH mouse fix for Linux, ver 1.8
 #S.D.G.
 
 """
@@ -226,7 +226,7 @@ class MPHMousefix(object):
                     
                 elif e.name == PAUSE_KEY: #Pause the mouse fix
                     print("Paused")
-                    pyautogui.mouseUp(_pause = False)
+                    pyautogui.mouseUp()
                     is_paused=True
                     continue
                         
@@ -247,42 +247,42 @@ class MPHMousefix(object):
         """End the program."""
         self.running=False
         try:
-            pyautogui.mouseUp(_pause = False)
+            pyautogui.mouseUp()
             keyboard.stop_recording()
         finally:
             quit()
     
     def weaponselect(self, weapon):
         """Select a weapon by index 1-6"""
-        pyautogui.mouseUp(_pause = False)
+        pyautogui.mouseUp()
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(*TOUCHBUTTONS["WEAPON_SELECT"][0])
-        pyautogui.mouseDown(_pause = False)
+        pyautogui.mouseDown()
         time.sleep(TOUCHBUTTONS["WEAPON_SELECT"][1])
         self.goto_relative(*WEAPONSELECT_BUTTONS[weapon-1])
         time.sleep(BUTTON_WAIT)
-        pyautogui.mouseUp(_pause = False)
+        pyautogui.mouseUp()
         time.sleep(MOUSE_RESET_WAIT)
         self.reset_mouse()
 
     def fire(self, e):
         """Fire the gun, or stop firing"""
         if e.event_type=="down":
-            pyautogui.keyDown(FIRE_KEY, _pause = False)
+            pyautogui.keyDown(FIRE_KEY, )
         else:
-            pyautogui.keyUp(FIRE_KEY, _pause = False)
+            pyautogui.keyUp(FIRE_KEY, )
             if self.out_of_drag_bounds(*self.abs_to_rel(*mouse.get_position())) != (0, 0): #Mouse moved out of bounds while holding a charged shot
                 self.reset_mouse()
             else:
-                pyautogui.mouseDown(_pause = False) #The mouse has been truly released, so simulate pressing it again
+                pyautogui.mouseDown() #The mouse has been truly released, so simulate pressing it again
 
     def zoom_out(self, e):
         """Press or release the zoom out key"""
         #print("ZOOMOUT_KEY "+e.event_type)
         if e.event_type == "down":
-            pyautogui.keyDown(ZOOMOUT_KEY, _pause = False)
+            pyautogui.keyDown(ZOOMOUT_KEY, )
         elif e.event_type == "up":
-            pyautogui.keyUp(ZOOMOUT_KEY, _pause = False)
+            pyautogui.keyUp(ZOOMOUT_KEY, )
 
         if not self.multiplayer and self.get_is_morphball(): #Sacrifice steering for via-button boost ball
             if e.event_type == "down":
@@ -292,7 +292,7 @@ class MPHMousefix(object):
 
     def boost_ball(self, e):
         """Perform a touch-based boost ball"""
-        pyautogui.mouseUp(_pause = False)
+        pyautogui.mouseUp()
         time.sleep(MOUSE_RESET_WAIT)
         
         direction=[0, 0]
@@ -315,7 +315,7 @@ class MPHMousefix(object):
         #print("Boost from ", start_x, start_y, "to", end_x, end_y)
         self.goto_relative(start_x, start_y)
         time.sleep(MOUSE_RESET_WAIT)
-        pyautogui.mouseDown(_pause = False)
+        pyautogui.mouseDown()
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(end_x, end_y)
         time.sleep(MOUSE_RESET_WAIT)
@@ -332,12 +332,12 @@ class MPHMousefix(object):
             return
 
         print("Wrapping mouse")
-        pyautogui.mouseUp(_pause = False)
+        pyautogui.mouseUp()
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(
              (MOUSE_DRAG_AREA_X[1], MOUSE_DRAG_AREA_CENTER[0], MOUSE_DRAG_AREA_X[0])[oob[0] + 1] + MOUSE_DROP_MARGIN * oob[0],
              (MOUSE_DRAG_AREA_Y[1], MOUSE_DRAG_AREA_CENTER[1], MOUSE_DRAG_AREA_Y[0])[oob[1] + 1] + MOUSE_DROP_MARGIN * oob[1])
-        pyautogui.mouseDown(_pause = False)
+        pyautogui.mouseDown()
 
     def rel_to_abs(self, x, y):
         """Convert relative touch position to real screen position"""
@@ -354,10 +354,10 @@ class MPHMousefix(object):
 
     def touchbutton(self, button):
         """Push a touch button in form ((x, y), wait)"""
-        pyautogui.mouseUp(_pause = False)
+        pyautogui.mouseUp()
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(*button[0])
-        pyautogui.mouseDown(_pause = False)
+        pyautogui.mouseDown()
 
         for i in range(int(button[1] / BUTTON_HOLD_INTERVAL)): #Lock the mouse onto the button by constantly moving back to it
             time.sleep(BUTTON_HOLD_INTERVAL)
@@ -368,9 +368,10 @@ class MPHMousefix(object):
                     
     def reset_mouse(self, e=None):
         """Reset the mouse to the center position"""
-        pyautogui.mouseUp(_pause = False)
+        pyautogui.mouseUp()
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(*MOUSE_DRAG_AREA_CENTER)
-        pyautogui.mouseDown(_pause = False)
-        
-mmf=MPHMousefix(multiplayer = "y" in input("Are you going into multiplayer? y/[N]: ").lower())
+        pyautogui.mouseDown()
+
+if __name__ == "__main__":
+    mmf=MPHMousefix(multiplayer = "y" in input("Are you going into multiplayer? y/[N]: ").lower())
