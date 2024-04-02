@@ -1,4 +1,4 @@
-# MPH-DS-mouse-fixer-linux
+# Nintendo DS FPS Mouse Fixer for Linux
 A Python-based Linux port of https://github.com/JDoe212/DS-FPS-Mouse-Fixer
 Currently written mousefixes:
 - Metroid Prime Hunters
