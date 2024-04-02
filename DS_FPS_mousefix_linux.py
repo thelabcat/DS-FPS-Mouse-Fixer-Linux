@@ -48,6 +48,13 @@ DIRECTIONS = {"UP":(0, -1),
               "LEFT":(-1, 0)
               }
 
+
+MOUSEBINDS = { #Mouse bindings
+    "left" : "fire",
+    "middle" : "reset_mouse",
+    "right" : "zoom_out"
+    }
+
 class MousefixBase(object):
     def __init__(self, USE_AUTO_PAUSE = True):
         """Nintendo DS Mousefix base"""
@@ -59,11 +66,6 @@ class MousefixBase(object):
         self.MOUSE_DRAG_AREA_Y = (0, self.SCALE[1]) #Range of Y coordinates we can drag in
 
         self.KEYBINDS = {} #Keybindings
-        self.MOUSEBINDS = { #Mouse bindings
-            "left" : "fire",
-            "middle" : "reset_mouse",
-            "right" : "zoom_out"
-            }
         self.TOUCHBUTTONS = {} #Each button's position, and how long to press it
         self.WEAPONSELECT_BUTTONS = () #Weapon selection buttons by numerical index
 
@@ -185,8 +187,8 @@ class MousefixBase(object):
 
             if not self.mouseevents.empty(): #Do not hold the loop waiting for a mouse event
                 e = self.mouseevents.get()
-                if type(e)==mouse.ButtonEvent and e.button in self.MOUSEBINDS.keys():
-                    exec("self."+self.MOUSEBINDS[e.button]+"(e)") #Run one of our three mouse bound functions
+                if type(e)==mouse.ButtonEvent and e.button in MOUSEBINDS.keys():
+                    exec("self."+MOUSEBINDS[e.button]+"(e)") #Run one of our three mouse bound functions
 
             if not mouse.is_pressed(): #Give up wrap if mouse is actually held down
                 self.mousewrap(*self.abs_to_rel(*mouse.get_position())) #Perform a mouse wrap enforcement check
@@ -279,3 +281,6 @@ class MousefixBase(object):
         time.sleep(MOUSE_RESET_WAIT)
         self.goto_relative(*self.mouse_drag_area_center)
         pyautogui.mouseDown()
+
+if __name == "__main__":
+    print("Nintendo DS FPS mousefix base module. Not meant to be run standalone.")
