@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH First Hunt mouse fix for Linux, ver 2.0
+#MPH First Hunt mouse fix for Linux
 #S.D.G.
 
 """

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#MPH mouse fix for Linux, ver 2.0
+#MPH mouse fix for Linux
 #S.D.G.
 
 from DS_FPS_mousefix_linux import *
@@ -48,8 +48,6 @@ class MPHMousefix(MousefixBase):
             "OK" : ((450, 495), BUTTON_WAIT),
             "YES" : ((337, 495), BUTTON_WAIT),
             "NO" : ((563, 495), BUTTON_WAIT),
-        #    "PAGE_LEFT" : ((288, 515), BUTTON_WAIT),
-        #    "PAGE_RIGHT" : ((612, 515), BUTTON_WAIT),
             "MORPH_BALL" : ((775, 585), BUTTON_WAIT),
             "WEAPON_SELECT" : ((810, 120), BUTTON_WAIT)
             }
