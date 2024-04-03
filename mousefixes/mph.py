@@ -2,12 +2,9 @@
 #MPH mouse fix for Linux
 #S.D.G.
 
-from DS_FPS_mousefix_linux import *
-
 class MPHMousefix(MousefixBase):
-    def __init__(self, MULTIPLAYER = True):
-        super(type(self), self).__init__(USE_AUTO_PAUSE = not MULTIPLAYER)
-        self.MULTIPLAYER = MULTIPLAYER
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.SCALE = (900, 674) #Size of reference window
 
@@ -90,7 +87,7 @@ class MPHMousefix(MousefixBase):
         elif e.event_type == "up":
             pyautogui.keyUp(R_SHOULDER_KEY, )
 
-        if not self.MULTIPLAYER and self.get_is_morphball(): #Sacrifice steering for via-button boost ball
+        if self.USE_HUD_DETECT and self.get_is_morphball(): #Sacrifice steering for via-button boost ball
             if e.event_type == "down":
                 pyautogui.mouseUp()
             elif e.event_type == "up":
@@ -127,6 +124,5 @@ class MPHMousefix(MousefixBase):
         time.sleep(MOUSE_RESET_WAIT)
         self.reset_mouse()
 
-if __name__ == "__main__":
-    mmf=MPHMousefix(MULTIPLAYER = "y" in input("Are you going into multiplayer? y/[N]: ").lower())
-    mmf.start()
+name = "Metroid Prime Hunters"
+mousefix = MPHMousefix

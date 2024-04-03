@@ -1,19 +1,11 @@
 #!/usr/bin/env python3
 #MPH First Hunt mouse fix for Linux
 #S.D.G.
-
-"""
-NOTES:
-- Boost ball should not be handled by the mousefix, as it works via a double-tap of direction buttons.
-"""
-
-from DS_FPS_mousefix_linux import *
     
 class FirstHuntMousefix(MousefixBase):
-    
-    def __init__(self, run=True, USE_AUTO_PAUSE=True):
+    def __init__(self, *args, **kwargs):
         """MouseFix for Metroid Prime: Hunters [First Hunt]"""
-        super(type(self), self).__init__(USE_AUTO_PAUSE)
+        super().__init__(*args, **kwargs)
         self.SCALE = (1280, 960) #Size of reference window
 
         #Limits of where to wrap the mouse
@@ -59,6 +51,5 @@ class FirstHuntMousefix(MousefixBase):
                 self.reset_mouse()
                 time.sleep(BUTTON_WAIT)
 
-if __name__ == "__main__":
-    fhmf=FirstHuntMousefix(USE_AUTO_PAUSE = not "n" in input("Use HUD check auto-pause? [Y]/n: ").lower())
-    fhmf.start()
+name = "Metroid PH: First Hunt"
+mousefix = FirstHuntMousefix

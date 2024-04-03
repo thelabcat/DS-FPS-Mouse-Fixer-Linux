@@ -7,6 +7,13 @@ import keyboard
 import pyautogui #For HUD detection and working around faults in the mouse and keyboard modules
 import time
 import queue
+import threading
+import tkinter as tk
+from tkinter import messagebox as mb
+import os
+import getpass
+import platform
+import glob
 
 #Disable all delays in pyautogui
 pyautogui.MINIMUM_DURATION=0
@@ -55,10 +62,14 @@ MOUSEBINDS = { #Mouse bindings
     "right" : "zoom_out"
     }
 
-class MousefixBase(object):
-    def __init__(self, USE_AUTO_PAUSE = True):
+MOUSEFIX_PATH = __file__[:__file__.rfind(os.sep)] + os.sep + "mousefixes" + os.sep #Path of mousefixes
+
+class MousefixBase(threading.Thread):
+    def __init__(self, USE_HUD_DETECT = True, host_gui = None):
         """Nintendo DS Mousefix base"""
-        self.USE_AUTO_PAUSE = USE_AUTO_PAUSE
+        super().__init__()
+        self.USE_HUD_DETECT = USE_HUD_DETECT #Use HUD detection for auto-pausing and such
+        self.host_gui = host_gui #Host GUI
 
         #Scale of touchscreen and size of drag area
         self.SCALE = (900, 674) #Size of reference window
@@ -78,11 +89,6 @@ class MousefixBase(object):
     def mouse_drag_area_center(self):
         """Relative center of draggable area"""
         return sum(self.MOUSE_DRAG_AREA_X)//2, sum(self.MOUSE_DRAG_AREA_Y)//2
-
-    def start(self):
-        """Method called if __init__(run = True)"""
-        self.touch_offset, self.touch_size = self.get_touch_area()
-        self.mainloop()
 
     def get_touch_area(self):
         """Get the initial touch area and return touch_offset and touch_size"""
@@ -120,9 +126,10 @@ class MousefixBase(object):
 
         return self.manual_paused
 
-    def mainloop(self):
+    def run(self):
         """Start the program"""
         self.running=True
+        self.touch_offset, self.touch_size = self.get_touch_area()
         keyboard.add_hotkey(KILL_KEY, self.kill) #Kill the program when this key is pressed, no matter what
 
         self.keyevents=keyboard.start_recording()[0] #Get a keyboard events queue
@@ -142,7 +149,7 @@ class MousefixBase(object):
                 continue
 
             #If auto pause is enabled and it has been more than HUD_CHECK_INTERVAL seconds since we last checked for the HUD...
-            if self.USE_AUTO_PAUSE and time.time()-self.last_hudcheck>HUD_CHECK_INTERVAL:
+            if self.USE_HUD_DETECT and time.time()-self.last_hudcheck>HUD_CHECK_INTERVAL:
                 self.last_hudcheck=time.time()
                 self.is_hud=self.get_is_hud()
                 if not self.was_hud and self.is_hud:
@@ -199,12 +206,14 @@ class MousefixBase(object):
             q.get()
 
     def kill(self):
-        """End the program."""
+        """Exit the mousefix."""
         self.running=False
         try:
             pyautogui.mouseUp()
             keyboard.stop_recording()
         finally:
+            if self.host_gui: #We were passed a host GUI
+                self.host_gui.destroy() #Kill the host GUI when the mousefix exits
             quit()
 
     def weaponselect(self, weapon):
@@ -282,5 +291,75 @@ class MousefixBase(object):
         self.goto_relative(*self.mouse_drag_area_center)
         pyautogui.mouseDown()
 
-if __name == "__main__":
-    print("Nintendo DS FPS mousefix base module. Not meant to be run standalone.")
+#Load and register the mousefixes
+mousefix_registry = {}
+for script_fn in glob.glob(MOUSEFIX_PATH + "*"):
+    script = open(script_fn)
+    exec(script.read())
+    mousefix_registry[name] = mousefix
+
+class MousefixWindow(tk.Tk):
+    def __init__(self):
+        """Window to choose and start a mousefix"""
+        super().__init__()
+        self.title("DS FPS Mouse Fixer")
+        self.START_DELAY = 3 #Delay after pressing start to actually start
+        self.INFO_STRING = "Select a game from the menu, then press Start. You will have %i seconds to switch to the emulator window, before this window turns red, indicating the mousefix is active. Once it turns red, click two diagonal opposite corners of the stylus play area.\nREMINDER: %s pauses the mouse fix, %s kills it. Enjoy!\nS.D.G." % (self.START_DELAY, PAUSE_KEY, KILL_KEY)
+
+        self.mousefix=None
+        self.build()
+        self.mainloop()
+
+        #Called after window is closed
+        self.mousefix.kill()
+        self.mousefix.join()
+
+    def build(self):
+        """Construct the GUI"""
+        self.geometry("400x300")
+
+        self.mainframe = tk.Frame(self)
+        self.mainframe.grid(sticky = tk.NSEW)
+        self.rowconfigure(0, weight = 1)
+        self.columnconfigure(0, weight = 1)
+
+        self.mousefix_choice = tk.StringVar(self)
+        self.mousefix_chooser = tk.OptionMenu(self.mainframe, self.mousefix_choice, *mousefix_registry.keys())
+        self.mousefix_chooser.grid(row = 0, sticky = tk.E + tk.W)
+
+        self.hud_detect_choice = tk.BooleanVar(self, value = True)
+        self.hud_detect_chooser = tk.Checkbutton(self.mainframe, text = "Use HUD detection feature.", variable = self.hud_detect_choice)
+        self.hud_detect_chooser.grid(row = 1, sticky = tk.E + tk.W)
+
+        self.start_button = tk.Button(self.mainframe, text = "Start", command = self.launch_mousefix)
+        self.start_button.grid(row = 2, sticky = tk.E + tk.W)
+
+        self.info_text = tk.Text(self.mainframe, wrap = "word")
+        self.info_text.grid(row = 3, sticky = tk.NSEW)
+        self.info_text.insert(0.0, self.INFO_STRING)
+        self.info_text.configure(state = "disabled")
+        self.mainframe.rowconfigure(3, weight = 1)
+
+        self.mainframe.columnconfigure(0, weight = 1)
+
+
+    def launch_mousefix(self):
+        """Launch a mousefix"""
+        if not self.mousefix_choice.get(): #No mousefix was chosen
+            return
+
+        if getpass.getuser() != "root" and platform.system() == "Linux": #Must run script as root on Linux
+            mb.showerror(title = "Root priviledges required", message = "Directly reading device events on Linux requires root priviledges. Try running this script again using the `sudo` command.")
+            self.destroy()
+            quit()
+            return
+
+        #Startup the mousefix
+        self.mousefix = mousefix_registry[self.mousefix_choice.get()](USE_HUD_DETECT = self.hud_detect_choice.get(), host_gui = self) #Initialize the mousefix class we just loaded in
+        self.mainframe.destroy()
+        ## self.configure(bg = "green")
+        time.sleep(self.START_DELAY)
+        self.mousefix.start()
+        self.configure(bg = "red")
+
+MousefixWindow()
