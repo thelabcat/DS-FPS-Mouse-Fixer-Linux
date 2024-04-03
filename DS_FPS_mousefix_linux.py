@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#Nintendo DS FPS mousefix for linux - base module
+#Nintendo DS FPS mousefix for linux - main GUI
 #S.D.G.
 
 import mouse
@@ -205,14 +205,14 @@ class MousefixBase(threading.Thread):
         while not q.empty():
             q.get()
 
-    def kill(self):
+    def kill(self, destroy_gui = True):
         """Exit the mousefix."""
         self.running=False
         try:
             pyautogui.mouseUp()
             keyboard.stop_recording()
         finally:
-            if self.host_gui: #We were passed a host GUI
+            if self.host_gui and destroy_gui: #We were passed a host GUI at startup, and told in this call to destroy it
                 self.host_gui.destroy() #Kill the host GUI when the mousefix exits
             quit()
 
@@ -296,7 +296,7 @@ mousefix_registry = {}
 for script_fn in glob.glob(MOUSEFIX_PATH + "*"):
     script = open(script_fn)
     exec(script.read())
-    mousefix_registry[name] = mousefix
+    mousefix_registry[name] = mousefix #Each mousefix must end with a name variable set to a pretty name string, and a mousefix variable set to the new mousefix class
 
 class MousefixWindow(tk.Tk):
     def __init__(self):
@@ -311,29 +311,34 @@ class MousefixWindow(tk.Tk):
         self.mainloop()
 
         #Called after window is closed
-        self.mousefix.kill()
+        self.mousefix.kill(destroy_gui = False)
         self.mousefix.join()
 
     def build(self):
         """Construct the GUI"""
         self.geometry("400x300")
 
+        #Using a frame to get rid of all widgets after a mousefix has been started
         self.mainframe = tk.Frame(self)
         self.mainframe.grid(sticky = tk.NSEW)
         self.rowconfigure(0, weight = 1)
         self.columnconfigure(0, weight = 1)
 
+        #Choose a mousefix
         self.mousefix_choice = tk.StringVar(self)
         self.mousefix_chooser = tk.OptionMenu(self.mainframe, self.mousefix_choice, *mousefix_registry.keys())
         self.mousefix_chooser.grid(row = 0, sticky = tk.E + tk.W)
 
+        #Choose wether to enable HUD detection for auto-pause and other features
         self.hud_detect_choice = tk.BooleanVar(self, value = True)
         self.hud_detect_chooser = tk.Checkbutton(self.mainframe, text = "Use HUD detection feature.", variable = self.hud_detect_choice)
         self.hud_detect_chooser.grid(row = 1, sticky = tk.E + tk.W)
 
+        #Start button
         self.start_button = tk.Button(self.mainframe, text = "Start", command = self.launch_mousefix)
         self.start_button.grid(row = 2, sticky = tk.E + tk.W)
 
+        #Additional help information display
         self.info_text = tk.Text(self.mainframe, wrap = "word")
         self.info_text.grid(row = 3, sticky = tk.NSEW)
         self.info_text.insert(0.0, self.INFO_STRING)
@@ -355,10 +360,9 @@ class MousefixWindow(tk.Tk):
             return
 
         #Startup the mousefix
-        self.mousefix = mousefix_registry[self.mousefix_choice.get()](USE_HUD_DETECT = self.hud_detect_choice.get(), host_gui = self) #Initialize the mousefix class we just loaded in
-        self.mainframe.destroy()
-        ## self.configure(bg = "green")
-        time.sleep(self.START_DELAY)
+        self.mousefix = mousefix_registry[self.mousefix_choice.get()](USE_HUD_DETECT = self.hud_detect_choice.get(), host_gui = self)
+        self.mainframe.destroy() #Get rid of all widgets
+        time.sleep(self.START_DELAY) #Should probably be threaded, tbh
         self.mousefix.start()
         self.configure(bg = "red")
 
