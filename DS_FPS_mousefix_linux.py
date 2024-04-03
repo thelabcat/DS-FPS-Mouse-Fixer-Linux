@@ -311,8 +311,9 @@ class MousefixWindow(tk.Tk):
         self.mainloop()
 
         #Called after window is closed
-        self.mousefix.kill(destroy_gui = False)
-        self.mousefix.join()
+        if self.mousefix: #A mousefix was running
+            self.mousefix.kill(destroy_gui = False)
+            self.mousefix.join()
 
     def build(self):
         """Construct the GUI"""
@@ -331,7 +332,7 @@ class MousefixWindow(tk.Tk):
 
         #Choose wether to enable HUD detection for auto-pause and other features
         self.hud_detect_choice = tk.BooleanVar(self, value = True)
-        self.hud_detect_chooser = tk.Checkbutton(self.mainframe, text = "Use HUD detection feature.", variable = self.hud_detect_choice)
+        self.hud_detect_chooser = tk.Checkbutton(self.mainframe, text = "Use HUD detection features", variable = self.hud_detect_choice)
         self.hud_detect_chooser.grid(row = 1, sticky = tk.E + tk.W)
 
         #Start button
