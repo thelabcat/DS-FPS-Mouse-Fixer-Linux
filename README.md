@@ -18,7 +18,7 @@ Additionally, to use the HUD detection features on Linux, you will also need to 
 
 ## Usage
 ### TOML Configuration:
-- Set your emulator keybinds to match emuKeys in the configuration TOML, or vice versa. By default, D-Pad is WASD, and the left and right shoulder buttons are M and M respectively.
+- Set your emulator keybinds to match emuKeys in the configuration TOML, or vice versa. By default, D-Pad is WASD, and the left and right shoulder buttons are N and M respectively.
 - Change the mousefix keybinds under mousefix.default for use by all mousefixes, or under mousefix.*MousefixName* for mousefix-specific settings, but beware that you cannot specify between left and right Shift, or left and right Control. Also beware that for some reason the keyboard library detects H as Backspace on my system.
 - Changing other values is not recommended.
 
