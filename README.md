@@ -19,13 +19,13 @@ Additionally, to use the HUD detection features on Linux, you will also need to 
 ## Usage
 ### Configuration:
 - Set N and M as the left and right shoulder buttons respectively in your emulator.
-- Either set your D-Pad buttons as WASD in your emulator, or change the DPAD_KEYS variable in the DS_FPS_mousefix_linux.py module to match your preferred configuration.
+- Either set your D-Pad buttons as WASD in your emulator, or change the DPAD_KEYS variable in DS_FPS_mousefix.py to match your preferred configuration.
 - All global variables in the DS_FPS_mousefix_linux.py module are inherited by all mousefixes. Configure them in the module.
 - You can change the key bindings in the KEYBINDINGS dictionary of the mousefixes, but beware that you cannot specify between left and right Shift, or left and right Control. Also beware that for some reason the keyboard library detects H as Backspace on my system.
 - Changing MOUSEBINDS is not recommended, as some functions of the mousefix assume they will not change.
 
 ### Running the script:
-1. The DS_FPS_mousefix_linux.py script is the main program. The scripts in the mousefixes folder are not meant to be run by themselves as they rely on it.
+1. The DS_FPS_mousefix.py script is the main program. The scripts in the mousefixes folder are not meant to be run by themselves as they rely on it.
 2. You have to run the program as root on Linux, as the keyboard and mouse libraries require root access on that platform.
 3. When the GUI opens, select a game from the option menu.
 4. If you do not want to use HUD detection for auto-pause and other features, uncheck the "Use HUD detection" box.
