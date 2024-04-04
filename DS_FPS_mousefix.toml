@@ -1,0 +1,120 @@
+mouseResetWait = 0.035 #pertains to the time before the mouse moves again, adjust this if your camera keeps jerking when your cursor is reset to center.
+buttonWait = 0.120 #pertains to the time before the mouse moves after pressing a button, adjust this if you get ghost inputs [buttons not properly pressed].
+keyWait = 0.050 #pertains to the time between key inputs, this is used for some macros such as sprinting and crouching in the COD Games, adjust this if those inputs are not caught.
+hudCheckInterval = 1 #How often to check if Samus's HUD is shown
+pauseInterval = 0.1 #How often to run the pause loop
+buttonHoldInterval = 0.05 #How often to rerun the mouse movement command to keep the cursor locked onto a button
+
+mouseDragMargin = 5 #How close we can get to the edge before we wrap
+mouseDropMargin = 10 #How far away from the other edge to drop the cursor when we wrap
+
+pauseKey="\\" #Pause the mouse fix manually
+killKey="backspace" #Kill the mouse fix
+
+[emuKeys.shoulder]
+#Keys that the emulator is set to interpret as shoulder button presses
+L = "n" #Used for firing
+R = "m" #Used for zooming
+
+[emuKeys.dPad]
+#Keys that the DS emulator is set to interpret as D-pad
+up = "w"
+down = "s"
+left = "a"
+right = "d"
+
+[directions]
+#Direction names as mapped to screen coordinate factors
+up = [0, -1]
+down = [0, 1]
+left = [-1, 0]
+right = [1, 0]
+
+[mousebinds] #Mouse bindings
+left = "fire"
+middle = "reset_mouse"
+right = "zoom_out"
+
+[mousefix.default]
+scale = [1280, 960] #Size of reference window
+#Limits of where to wrap the mouse
+mouseDragAreaX = [0, 1280]
+mouseDragAreaY = [0, 960]
+keybinds = {}
+touchButtons = {}
+weaponSelectButtons = []
+colorTolerance = 10
+
+[mousefix.firstHunt]
+scale = [1280, 960] #Size of reference window
+
+#Limits of where to wrap the mouse
+mouseDragAreaX = [0, 1115]
+mouseDragAreaY = [0, 555]
+
+isHudCoords = [45, 625] #Coordinates to check for color match if we are in HUD or elsewhere
+isHudColor = [219, 162, 56] #Color of varia components in HUD
+
+[mousefix.firstHunt.keybinds]
+q = "mainWeapon"
+e = "missiles"
+r = "thirdWeapon"
+ctrl = "morphBall"
+space = "jump"
+
+[mousefix.firstHunt.touchButtons] #Each button's position, and how long to press it, or false to use the default buttonWait
+mainWeapon = [[930, 864], false]
+missiles = [[1090, 744], false]
+thirdWeapon = [[1200, 579], false]
+morphBall = [[165, 780], false]
+
+[mousefix.MPH]
+scale = [900, 674] #Size of reference window
+
+#Limits of where to wrap the mouse
+mouseDragAreaX = [0,  900]
+mouseDragAreaY = [225, 495]
+
+boostSwipeSize = 400 #The pixel length a boost swipe must be for the ROM to recognize it
+
+isHudCoords = [5,  667] #Coordinates to check for color match if we are in HUD or in the ship
+isMorphBallCoords = [800, 530] #Coordinates to check if we are in morphball mode or not
+isHudColor = [211, 154, 73] #Color of varia components in HUD
+
+defaultBBDirection = "up" #Default direction to touch-based boost ball in
+
+weaponSelectButtons = [ #Positions of each weapon in the weapon select pie menu
+    [327, 168],
+    [341, 302],
+    [373, 439],
+    [485, 555],
+    [622, 590],
+    [763, 604],
+    ]
+
+#Most key bindings
+[mousefix.MPH.keybinds]
+q = 'mainWeapon'
+e = 'missiles'
+r = 'thirdWeapon'
+f = 'scanVisor'
+z = 'pageLeft'
+c = 'pageRight'
+x = 'ok'
+v = 'yes'
+b = 'no'
+ctrl = 'morphBall'
+tab = 'boost_ball'
+
+[mousefix.MPH.touchButtons] #Each button's position, and how long to press it
+mainWeapon = [[300, 112], false]
+missiles = [[440, 113], false]
+thirdWeapon = [[605, 120], false]
+scanVisor = [[450, 608], 0.5]
+pageLeft = [[250, 495], false]
+pageRight = [[650, 495], false]
+ok = [[450, 495], false]
+yes = [[337, 495], false]
+no = [[563, 495], false]
+morphBall = [[775, 585], false]
+weaponSelect = [[810, 120], false]
