@@ -25,7 +25,7 @@ pyautogui.PAUSE=0
 pyautogui.FAILSAFE=False
 
 OP_PATH = __file__[:__file__.rfind(os.sep)]
-CONFIG_PATH = "DS_FPS_mousefix.toml"
+CONFIG_PATH = "config.toml"
 with open(CONFIG_PATH, "rb") as f:
     CONFIG = tomllib.load(f)
 
