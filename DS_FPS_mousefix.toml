@@ -77,10 +77,6 @@ mouseDragAreaY = [225, 495]
 
 boostSwipeSize = 400 #The pixel length a boost swipe must be for the ROM to recognize it
 
-isHudCoords = [5,  667] #Coordinates to check for color match if we are in HUD or in the ship
-isMorphBallCoords = [800, 530] #Coordinates to check if we are in morphball mode or not
-isHudColor = [211, 154, 73] #Color of varia components in HUD
-
 defaultBBDirection = "up" #Default direction to touch-based boost ball in
 
 weaponSelectButtons = [ #Positions of each weapon in the weapon select pie menu
@@ -118,3 +114,47 @@ yes = [[337, 495], false]
 no = [[563, 495], false]
 morphBall = [[775, 585], false]
 weaponSelect = [[810, 120], false]
+
+[mousefix.MPH.hunterSpecs.Samus]
+isHudCoords = [5,  667] #Coordinates to check for color match if we are in HUD
+isHudColor = [211, 154, 73] #Color of varia components in HUD
+## isHudCoords = [395,  450] #Coordinates to check for color match if we are in HUD
+## isHudColor = [105, 227, 40] #Color of radar triangle
+isAltCoords = [800, 530] #Coordinates to check if we are in alt form or not
+isAltColor = [211, 154, 73] #Color that the morph switch turns to at the specified coordinates when in alt form
+
+[mousefix.MPH.hunterSpecs.Kanden]
+isHudCoords = [450, 395] #Coordinates to check for color match if we are in HUD
+isHudColor = [251, 251, 89] #Color of radar triangle
+isAltCoords = [735, 613] #Coordinates to check if we are in alt form or not
+isAltColor = [251, 195, 138] #Color that the morph switch turns to at the specified coordinates when in alt form
+
+[mousefix.MPH.hunterSpecs.Spire]
+isHudCoords = [450, 423] #Coordinates to check for color match if we are in HUD
+isHudColor = [251, 113, 56] #Color of radar triangle
+isAltCoords = [750, 570] #Coordinates to check if we are in alt form or not
+isNotAltColor = [235, 178, 16] #Color that the morph switch turns to at the specified coordinates when not in alt form
+
+[mousefix.MPH.hunterSpecs.Trace]
+isHudCoords = [450, 450] #Coordinates to check for color match if we are in HUD
+isHudColor = [227, 16, 24] #Color of radar triangle
+isAltCoords = [782, 531] #Coordinates to check if we are in alt form or not
+isAltColor = [227, 16, 24] #Color that the morph switch turns to at the specified coordinates when in alt form
+
+[mousefix.MPH.hunterSpecs.Noxus]
+isHudCoords = [450, 422] #Coordinates to check for color match if we are in HUD
+isHudColor = [81, 154, 211] #Color of radar triangle
+isAltCoords = [734, 464] #Coordinates to check if we are in alt form or not
+isAltColor = [138, 178, 243] #Color that the morph switch turns to at the specified coordinates when in alt form
+
+[mousefix.MPH.hunterSpecs.Sylux]
+isHudCoords = [450, 395] #Coordinates to check for color match if we are in HUD
+isHudColor = [211, 243, 162] #Color of radar triangle
+isAltCoords = [738, 624] #Coordinates to check if we are in alt form or not
+isAltColor = [227, 251, 195] #Color that the morph switch turns to at the specified coordinates when in alt form
+
+[mousefix.MPH.hunterSpecs.Weavel]
+isHudCoords = [450, 395] #Coordinates to check for color match if we are in HUD
+isHudColor = [211, 154, 56] #Color of radar triangle
+isAltCoords = [806, 618] #Coordinates to check if we are in alt form or not
+isAltColor = [203, 56, 32] #Color that the morph switch turns to at the specified coordinates when in alt form

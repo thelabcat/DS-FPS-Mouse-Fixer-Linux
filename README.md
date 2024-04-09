@@ -37,7 +37,7 @@ Additionally, to use the HUD detection features on Linux, you will also need to 
 
 - Metroid Prime Hunters:
     - I added V and B for yes and no, and X for OK.
-    - Boost ball can be done in two ways: By pressing Tab, optionally with direction key combos to boost in a direction other than forward (relies on TOML emuKeys.dPad being set correctly), or; With the HUD detection features (singleplayer only), by pressing, holding, and releasing RMB (this momentarily sacrifices mouse-based steering).
+    - Boost ball can be done in two ways: By pressing Tab, optionally with direction key combos to boost in a direction other than forward (relies on TOML emuKeys.dPad being set correctly), or; With the HUD detection features, by pressing, holding, and releasing RMB (this momentarily sacrifices mouse-based steering).
 - Metroid Prime Hunters First Hunt:
     - Jump can only be performed by a double tap on the touch screen, so this is mapped by default to Space. There is some latency here which I can't do anything about AFAIK. Switching weapons also inadvertently will trigger a jump, because the weapon buttons are within the jump double-tap area in the ROM programming.
 

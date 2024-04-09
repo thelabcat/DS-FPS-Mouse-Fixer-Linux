@@ -31,6 +31,12 @@ with open(CONFIG_PATH, "rb") as f:
 
 MOUSEFIX_PATH = OP_PATH + os.sep + "mousefixes" + os.sep #Path of mousefixes
 
+def distance(vec1, vec2):
+    """Find pythagorean distance between two iterable vectors"""
+    if len(vec1) != len(vec2):
+        raise ValueError("Vectors cannot have different number of axes")
+    return sum([x ** 2 for x in [vec2[i] - vec1[i] for i in range(len(vec1))]]) ** 0.5
+
 class MousefixBase(threading.Thread):
     config = "default"
 
@@ -95,7 +101,7 @@ class MousefixBase(threading.Thread):
 
     def run(self):
         """Start the program"""
-        self.running=True
+        self.running = True
         self.touch_offset, self.touch_size = self.get_touch_area()
         keyboard.add_hotkey(CONFIG["killKey"], self.kill) #Kill the program when this key is pressed, no matter what
 
@@ -106,10 +112,10 @@ class MousefixBase(threading.Thread):
 
         self.reset_mouse()
 
-        self.last_hudcheck=0 #Time of last HUD check
-        self.was_hud=True #Was HUD last time we checked
-        self.is_hud=True #Is hud on this check
-        self.manual_paused=False
+        self.last_hudcheck = 0 #Time of last HUD check
+        self.was_hud = True #Was HUD last time we checked
+        self.is_hud = True #Is hud on this check
+        self.manual_paused = False
 
         while self.running:
             if self.manual_pause_handler(): #Handle any possible unpauses, delay if not unpaused
@@ -118,14 +124,14 @@ class MousefixBase(threading.Thread):
             #If auto pause is enabled and it has been more than CONFIG["hudCheckInterval"] seconds since we last checked for the HUD...
             if self.use_hud_detect and time.time()-self.last_hudcheck>CONFIG["hudCheckInterval"]:
                 self.last_hudcheck=time.time()
-                self.is_hud=self.get_is_hud()
+                self.is_hud = self.get_is_hud()
                 if not self.was_hud and self.is_hud:
                     print("Hud detected. Engaging...")
                     self.reset_mouse()
                 elif not self.is_hud and self.was_hud:
                     print("Hud disappeared. Pausing...")
                     pyautogui.mouseUp()
-                self.was_hud=self.is_hud
+                self.was_hud = self.is_hud
                 if not self.is_hud:
                     time.sleep(CONFIG["hudCheckInterval"])
 

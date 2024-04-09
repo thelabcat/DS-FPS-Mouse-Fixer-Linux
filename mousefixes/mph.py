@@ -7,14 +7,30 @@ class MPHMousefix(MousefixBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.hunter = "Samus" #Currently played hunter
 
     def get_is_hud(self):
-        """Are we in the Varia HUD, not in the ship? Does not work in weapon select"""
-        return pyautogui.pixelMatchesColor(*self.rel_to_abs(*self["isHudCoords"]), self["isHudColor"], self["colorTolerance"])
+        """Are we in the HUD, not in the ship? Does not work in weapon select. Also sets self.hunter"""
+        screenshot = pyautogui.screenshot()
 
-    def get_is_morphball(self):
-        """Are we in morphball mode, not standing? Assumes we are in the Varia HUD"""
-        return pyautogui.pixelMatchesColor(*self.rel_to_abs(*self["isMorphBallCoords"]), self["isHudColor"], self["colorTolerance"])
+        hunter_detected = None #Which hunter did we detect first
+        for h in self["hunterSpecs"].keys():
+            if distance(screenshot.getpixel(self.rel_to_abs(*self["hunterSpecs"][h]["isHudCoords"])), self["hunterSpecs"][h]["isHudColor"]) < self["colorTolerance"]: #The color at the specified point is close to the right color.
+                hunter_detected = h
+                break
+
+        if hunter_detected and hunter_detected != self.hunter: #If we detected a hunter and it's a new one
+            print("New hunter detected: " + hunter_detected)
+            self.hunter = hunter_detected
+
+        return bool(hunter_detected) #Was there any hunter's HUD detected
+
+    def get_is_altform(self):
+        """Are we in alt form, not standing? Assumes we are in the Varia HUD. Depends on self.hunter being correct"""
+        try:
+            return pyautogui.pixelMatchesColor(*self.rel_to_abs(*self["hunterSpecs"][self.hunter]["isAltCoords"]), self["hunterSpecs"][self.hunter]["isAltColor"], self["colorTolerance"])
+        except KeyError: #No isAltColor, so check for isNotAltColor instead
+            return not pyautogui.pixelMatchesColor(*self.rel_to_abs(*self["hunterSpecs"][self.hunter]["isAltCoords"]), self["hunterSpecs"][self.hunter]["isNotAltColor"], self["colorTolerance"])
 
     def weaponselect(self, weapon):
         """Select a weapon by index 1-6"""
@@ -33,10 +49,12 @@ class MPHMousefix(MousefixBase):
         elif e.event_type == "up":
             pyautogui.keyUp(CONFIG["emuKeys"]["shoulder"]["R"], )
 
-        if self.use_hud_detect and self.get_is_morphball(): #Sacrifice steering for via-button boost ball
+        if self.use_hud_detect and self.get_is_altform(): #Sacrifice steering for via-button boost ball
             if e.event_type == "down":
+                print("Alt form detected, sacrificing steering.")
                 pyautogui.mouseUp()
             elif e.event_type == "up":
+                print("Steering restored")
                 self.reset_mouse()
 
     def boost_ball(self, e):
