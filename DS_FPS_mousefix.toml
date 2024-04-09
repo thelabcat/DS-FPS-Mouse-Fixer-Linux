@@ -118,43 +118,41 @@ weaponSelect = [[810, 120], false]
 [mousefix.MPH.hunterSpecs.Samus]
 isHudCoords = [5,  667] #Coordinates to check for color match if we are in HUD
 isHudColor = [211, 154, 73] #Color of varia components in HUD
-## isHudCoords = [395,  450] #Coordinates to check for color match if we are in HUD
-## isHudColor = [105, 227, 40] #Color of radar triangle
 isAltCoords = [800, 530] #Coordinates to check if we are in alt form or not
 isAltColor = [211, 154, 73] #Color that the morph switch turns to at the specified coordinates when in alt form
 
 [mousefix.MPH.hunterSpecs.Kanden]
-isHudCoords = [450, 395] #Coordinates to check for color match if we are in HUD
-isHudColor = [251, 251, 89] #Color of radar triangle
+isHudCoords = [160, 585] #Coordinates to check for color match if we are in HUD
+isHudColor = [81, 81, 65] #Color of highlight
 isAltCoords = [735, 613] #Coordinates to check if we are in alt form or not
 isAltColor = [251, 195, 138] #Color that the morph switch turns to at the specified coordinates when in alt form
 
 [mousefix.MPH.hunterSpecs.Spire]
-isHudCoords = [450, 423] #Coordinates to check for color match if we are in HUD
-isHudColor = [251, 113, 56] #Color of radar triangle
+isHudCoords = [20, 510] #Coordinates to check for color match if we are in HUD
+isHudColor = [89, 73, 56] #Color of highlight
 isAltCoords = [750, 570] #Coordinates to check if we are in alt form or not
 isNotAltColor = [235, 178, 16] #Color that the morph switch turns to at the specified coordinates when not in alt form
 
 [mousefix.MPH.hunterSpecs.Trace]
-isHudCoords = [450, 450] #Coordinates to check for color match if we are in HUD
-isHudColor = [227, 16, 24] #Color of radar triangle
+isHudCoords = [875, 515] #Coordinates to check for color match if we are in HUD
+isHudColor = [113, 113, 113] #Color of highlight
 isAltCoords = [782, 531] #Coordinates to check if we are in alt form or not
 isAltColor = [227, 16, 24] #Color that the morph switch turns to at the specified coordinates when in alt form
 
 [mousefix.MPH.hunterSpecs.Noxus]
-isHudCoords = [450, 422] #Coordinates to check for color match if we are in HUD
-isHudColor = [81, 154, 211] #Color of radar triangle
+isHudCoords = [80, 530] #Coordinates to check for color match if we are in HUD
+isHudColor = [73, 81, 89] #Color of indent
 isAltCoords = [734, 464] #Coordinates to check if we are in alt form or not
 isAltColor = [138, 178, 243] #Color that the morph switch turns to at the specified coordinates when in alt form
 
 [mousefix.MPH.hunterSpecs.Sylux]
-isHudCoords = [450, 395] #Coordinates to check for color match if we are in HUD
-isHudColor = [211, 243, 162] #Color of radar triangle
+isHudCoords = [115, 540] #Coordinates to check for color match if we are in HUD
+isHudColor = [89, 97, 138] #Color of highlight
 isAltCoords = [738, 624] #Coordinates to check if we are in alt form or not
 isAltColor = [227, 251, 195] #Color that the morph switch turns to at the specified coordinates when in alt form
 
 [mousefix.MPH.hunterSpecs.Weavel]
-isHudCoords = [450, 395] #Coordinates to check for color match if we are in HUD
-isHudColor = [211, 154, 56] #Color of radar triangle
+isHudCoords = [45, 480] #Coordinates to check for color match if we are in HUD
+isHudColor = [81, 89, 73] #Color of highlight
 isAltCoords = [806, 618] #Coordinates to check if we are in alt form or not
 isAltColor = [203, 56, 32] #Color that the morph switch turns to at the specified coordinates when in alt form
