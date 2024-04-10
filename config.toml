@@ -4,6 +4,7 @@ keyWait = 0.050 #pertains to the time between key inputs, this is used for some 
 hudCheckInterval = 1 #How often to check if Samus's HUD is shown
 pauseInterval = 0.1 #How often to run the pause loop
 buttonHoldInterval = 0.05 #How often to rerun the mouse movement command to keep the cursor locked onto a button
+startDelay = 3 #Time until mousefix starts after clicking Start
 
 mouseDragMargin = 5 #How close we can get to the edge before we wrap
 mouseDropMargin = 10 #How far away from the other edge to drop the cursor when we wrap

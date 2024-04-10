@@ -1,5 +1,5 @@
 # Nintendo DS FPS Mouse Fixer for Linux
-A Python-based Linux port of https://github.com/JDoe212/DS-FPS-Mouse-Fixer with some quality of life improvements.
+A Python-based cross-platform port of https://github.com/JDoe212/DS-FPS-Mouse-Fixer with some quality of life improvements.
 Currently written mousefixes:
 - Metroid Prime Hunters
 - Metroid Prime Hunters First Hunt (Demo)
@@ -7,12 +7,12 @@ Currently written mousefixes:
 Support for other games is possible, but isn't planned at current. Request a game, or write a mousefix and create a pull request yourself if you want.
 
 ## Requirements:
-This program is tested and working with Python 3.12 on Fedora 39 x86 64.
+This program is tested and working with Python 3.12 on Fedora 39 and Windows 11, x86 64.
 To run from source, install Python 3.x, and the following Python libraries. If on Linux, they must be where root can see them. To achieve that, I ran Pip (Python's package installer) as root, even though it's not recommended.
 - [PyAutoGUI](https://pypi.org/project/PyAutoGUI/)
 - [Pillow](https://pypi.org/project/pillow/)
 - [Keyboard](https://pypi.org/project/keyboard/)
-- [Mouse](https://pypi.org/project/mouse/)
+- ~~[Mouse](https://pypi.org/project/mouse/)~~ *A modified version of this library with no doubleclick event type is included.*
 
 Additionally, to use the HUD detection features on Linux, you will also need to install whichever screenshot tool PyAutoGUI is configured to use. Python will tell you in a traceback if it's not available. Either scrot or gnome-screenshot.
 
@@ -42,7 +42,7 @@ Additionally, to use the HUD detection features on Linux, you will also need to 
     - Jump can only be performed by a double tap on the touch screen, so this is mapped by default to Space. There is some latency here which I can't do anything about AFAIK. Switching weapons also inadvertently will trigger a jump, because the weapon buttons are within the jump double-tap area in the ROM programming.
 
 ## Notes:
-- Because of a limitation in PyAutoGUI, the mousefixes will temporarily sacrifice wrapping while holding the mouse down. As soon as the mouse button is released irl, wrapping is restored, and the mouse is reset to center if it was dragged out of the bounds of the steer area. Try to avoid needing to steer when holding a charged shot or continuous fire from the full-auto weapons.
-- This program is not currently working on Windows 11 due to issues in the mouse library. Sorry.
+- Because of a limitation in PyAutoGUI, the mousefixes will temporarily sacrifice wrapping while holding the mouse down on Linux. As soon as the mouse button is released irl, wrapping is restored, and the mouse is reset to center if it was dragged out of the bounds of the steer area. Try to avoid needing to steer when holding a charged shot on Linux.
+- There is currently no protection for a feedback loop of keyboard inputs triggering themselves on Windows.
 
 See you next mission! S.D.G.

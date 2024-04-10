@@ -108,7 +108,7 @@ class MousefixBase(threading.Thread):
         self.keyevents=keyboard.start_recording()[0] #Get a keyboard events queue
 
         self.mouseevents=queue.Queue()
-        mouse.hook(self.mouseevents.put_nowait) #Get a mouse events queue
+        self.start_mouse_rec() #Start recording mouse events
 
         self.reset_mouse()
 
@@ -130,7 +130,7 @@ class MousefixBase(threading.Thread):
                     self.reset_mouse()
                 elif not self.is_hud and self.was_hud:
                     print("Hud disappeared. Pausing...")
-                    pyautogui.mouseUp()
+                    self.mouse_up()
                 self.was_hud = self.is_hud
                 if not self.is_hud:
                     time.sleep(CONFIG["hudCheckInterval"])
@@ -161,7 +161,7 @@ class MousefixBase(threading.Thread):
 
                 elif e.name == CONFIG["pauseKey"]: #Pause the mouse fix
                     print("Paused")
-                    pyautogui.mouseUp()
+                    self.mouse_up()
                     self.manual_paused = True
                     continue
 
@@ -170,8 +170,16 @@ class MousefixBase(threading.Thread):
                 if type(e)==mouse.ButtonEvent and e.button in CONFIG["mousebinds"].keys():
                     exec("self."+CONFIG["mousebinds"][e.button]+"(e)") #Run one of our three mouse bound functions
 
-            if not mouse.is_pressed(): #Give up wrap if mouse is actually held down
+            if platform.system() != "Linux" or not mouse.is_pressed(): #Give up wrap if mouse is actually held down on Linux
                 self.mousewrap(*self.abs_to_rel(*mouse.get_position())) #Perform a mouse wrap enforcement check
+
+    def start_mouse_rec(self):
+        """Start mouse recording"""
+        mouse.hook(self.mouseevents.put_nowait)
+
+    def pause_mouse_rec(self):
+        """Pause mouse recording"""
+        mouse.unhook(self.mouseevents.put_nowait)
 
     def clear_queue(self, q):
         """Clears the passed queue"""
@@ -195,21 +203,33 @@ class MousefixBase(threading.Thread):
 
     def fire(self, e):
         """Fire the gun, or stop firing"""
-        if e.event_type=="down":
+        if e.event_type == "down":
             pyautogui.keyDown(CONFIG["emuKeys"]["shoulder"]["L"])
-        else:
+        elif e.event_type == "up":
             pyautogui.keyUp(CONFIG["emuKeys"]["shoulder"]["L"])
             if self.out_of_drag_bounds(*self.abs_to_rel(*mouse.get_position())) != (0, 0): #Mouse moved out of bounds while holding a charged shot
                 self.reset_mouse()
             else:
-                pyautogui.mouseDown() #The mouse has been truly released, so simulate pressing it again
+                self.mouse_down() #The mouse has been truly released, so simulate pressing it again
+
+    def mouse_down(self, *args, **kwargs):
+        """Put down the mouse button, pausing the recording as necessary"""
+        self.pause_mouse_rec()
+        pyautogui.mouseDown(*args, **kwargs)
+        self.start_mouse_rec()
+
+    def mouse_up(self, *args, **kwargs):
+        """Lift up the mouse button, pausing the recording as necessary"""
+        self.pause_mouse_rec()
+        pyautogui.mouseUp(*args, **kwargs)
+        self.start_mouse_rec()
 
     def zoom_out(self, e):
         """Press or release the zoom out key"""
         #print("CONFIG["emuKeys"]["shoulder"]["R"] "+e.event_type)
-        if e.event_type == "down":
+        if e.event_type == "down" or (e.event_type == "double" and mouse.is_pressed(e.button)):
             pyautogui.keyDown(CONFIG["emuKeys"]["shoulder"]["R"])
-        else:
+        elif e.event_type == "up":
             pyautogui.keyUp(CONFIG["emuKeys"]["shoulder"]["R"])
 
     def out_of_drag_bounds(self, x, y):
@@ -223,12 +243,12 @@ class MousefixBase(threading.Thread):
             return
 
         print("Wrapping mouse")
-        pyautogui.mouseUp()
+        self.mouse_up()
         time.sleep(CONFIG["mouseResetWait"])
         self.goto_relative(
              (self["mouseDragAreaX"][1], self.mouse_drag_area_center[0], self["mouseDragAreaX"][0])[oob[0] + 1] + CONFIG["mouseDropMargin"] * oob[0],
              (self["mouseDragAreaY"][1], self.mouse_drag_area_center[1], self["mouseDragAreaY"][0])[oob[1] + 1] + CONFIG["mouseDropMargin"] * oob[1])
-        pyautogui.mouseDown()
+        self.mouse_down()
 
     def rel_to_abs(self, x, y):
         """Convert relative touch position to real screen position"""
@@ -245,10 +265,10 @@ class MousefixBase(threading.Thread):
 
     def touchbutton(self, button, reset = True):
         """Push a touch button in form ((x, y), wait). If not wait, default is used. If not reset, keep holding"""
-        pyautogui.mouseUp()
+        self.mouse_up()
         time.sleep(CONFIG["mouseResetWait"])
         self.goto_relative(*button[0])
-        pyautogui.mouseDown()
+        self.mouse_down()
 
         if button[1]: #If the specific button wait is false or zero, use the default button wait
             button_wait = button[1]
@@ -265,10 +285,10 @@ class MousefixBase(threading.Thread):
 
     def reset_mouse(self, e=None):
         """Reset the mouse to the center position"""
-        pyautogui.mouseUp()
+        self.mouse_up()
         time.sleep(CONFIG["mouseResetWait"])
         self.goto_relative(*self.mouse_drag_area_center)
-        pyautogui.mouseDown()
+        self.mouse_down()
 
 #Load and register the mousefixes
 mousefix_registry = {}
@@ -282,11 +302,16 @@ class MousefixWindow(tk.Tk):
         """Window to choose and start a mousefix"""
         super().__init__()
         self.title("DS FPS Mouse Fixer")
-        self.START_DELAY = 3 #Delay after pressing start to actually start
-        self.INFO_STRING = "Select a game from the menu, then press Start. You will have %i seconds to switch to the emulator window, before this window turns red, indicating the mousefix is active. Once it turns red, click two diagonal opposite corners of the stylus play area.\nREMINDER: %s pauses the mouse fix, %s kills it. Enjoy!\nS.D.G." % (self.START_DELAY, CONFIG["pauseKey"], CONFIG["killKey"])
+        self.INFO_STRING = "Select a game from the menu, then press Start. You will have %i seconds to switch to the emulator window, before this window turns red, indicating the mousefix is active. Once it turns red, click two diagonal opposite corners of the stylus play area.\nREMINDER: %s pauses the mouse fix, %s kills it. Enjoy!\nS.D.G." % (CONFIG["startDelay"], CONFIG["pauseKey"], CONFIG["killKey"])
 
         self.mousefix=None
         self.build()
+
+        if getpass.getuser() != "root" and platform.system() == "Linux": #Must run script as root on Linux
+            mb.showerror(title = "Root priviledges required", message = "Directly reading device events on Linux requires root priviledges. Try running this script again using the `sudo` command.")
+            self.destroy()
+            quit()
+
         self.mainloop()
 
         #Called after window is closed
@@ -334,16 +359,10 @@ class MousefixWindow(tk.Tk):
             mb.showerror("No mousefix selected", "You must first select a mousefix from the option menu.")
             return
 
-        if getpass.getuser() != "root" and platform.system() == "Linux": #Must run script as root on Linux
-            mb.showerror(title = "Root priviledges required", message = "Directly reading device events on Linux requires root priviledges. Try running this script again using the `sudo` command.")
-            self.destroy()
-            quit()
-            return
-
         #Startup the mousefix
         self.mousefix = mousefix_registry[self.mousefix_choice.get()](use_hud_detect = self.hud_detect_choice.get(), host_gui = self)
         self.mainframe.destroy() #Get rid of all widgets
-        time.sleep(self.START_DELAY) #Should probably be threaded, tbh
+        time.sleep(CONFIG["startDelay"]) #Should probably be threaded, tbh
         self.mousefix.start()
         self.configure(bg = "red")
 

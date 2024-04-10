@@ -37,14 +37,14 @@ class MPHMousefix(MousefixBase):
         self.touchbutton(self["touchButtons"]["weaponSelect"], reset = False)
         self.goto_relative(*self["weaponSelectButtons"][weapon-1])
         time.sleep(CONFIG["buttonWait"])
-        pyautogui.mouseUp()
+        self.mouse_up()
         time.sleep(CONFIG["mouseResetWait"])
         self.reset_mouse()
 
     def zoom_out(self, e):
         """Press or release the zoom out key, sacrificing mouse drag for boost ball"""
         #print("CONFIG["emuKeys"]["shoulder"]["R"] "+e.event_type)
-        if e.event_type == "down":
+        if e.event_type == "down" or (e.event_type == "double" and mouse.is_pressed(e.button)):
             pyautogui.keyDown(CONFIG["emuKeys"]["shoulder"]["R"], )
         elif e.event_type == "up":
             pyautogui.keyUp(CONFIG["emuKeys"]["shoulder"]["R"], )
@@ -52,14 +52,14 @@ class MPHMousefix(MousefixBase):
         if self.use_hud_detect and self.get_is_altform(): #Sacrifice steering for via-button boost ball
             if e.event_type == "down":
                 print("Alt form detected, sacrificing steering.")
-                pyautogui.mouseUp()
+                self.mouse_up()
             elif e.event_type == "up":
                 print("Steering restored")
                 self.reset_mouse()
 
     def boost_ball(self, e):
         """Perform a touch-based boost ball"""
-        pyautogui.mouseUp()
+        self.mouse_up()
         time.sleep(CONFIG["mouseResetWait"])
         
         direction=[0, 0]
@@ -82,7 +82,7 @@ class MPHMousefix(MousefixBase):
         #print("Boost from ", start_x, start_y, "to", end_x, end_y)
         self.goto_relative(start_x, start_y)
         time.sleep(CONFIG["mouseResetWait"])
-        pyautogui.mouseDown()
+        self.mouse_down()
         time.sleep(CONFIG["mouseResetWait"])
         self.goto_relative(end_x, end_y)
         time.sleep(CONFIG["mouseResetWait"])
