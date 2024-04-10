@@ -23,7 +23,7 @@ Additionally, to use the HUD detection features on Linux, you will also need to 
 - Changing other values is not recommended.
 
 ### Running the script:
-1. To run from source, the DS_FPS_mousefix.py script is the main program. The scripts in the mousefixes folder are not meant to be run by themselves as they rely on it.
+1. To run from source, the DS_FPS_mousefix.pyw script is the main program. The scripts in the mousefixes folder are not meant to be run by themselves as they rely on it.
 2. You have to run the program as root on Linux, as the keyboard and mouse libraries require root access on that platform.
 3. When the GUI opens, select a game from the option menu.
 4. If you do not want to use HUD detection for auto-pause and other features, uncheck the "Use HUD detection" box.
