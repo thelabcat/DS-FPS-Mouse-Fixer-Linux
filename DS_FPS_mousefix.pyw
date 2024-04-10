@@ -15,6 +15,7 @@ import getpass
 import platform
 import glob
 import tomllib
+import sys
 
 #Disable all delays in pyautogui
 pyautogui.MINIMUM_DURATION=0
@@ -195,7 +196,7 @@ class MousefixBase(threading.Thread):
         finally:
             if self.host_gui and destroy_gui: #We were passed a host GUI at startup, and told in this call to destroy it
                 self.host_gui.destroy() #Kill the host GUI when the mousefix exits
-            quit()
+            sys.exit()
 
     def weaponselect(self, weapon):
         """Select a weapon by index"""
@@ -310,7 +311,7 @@ class MousefixWindow(tk.Tk):
         if getpass.getuser() != "root" and platform.system() == "Linux": #Must run script as root on Linux
             mb.showerror(title = "Root priviledges required", message = "Directly reading device events on Linux requires root priviledges. Try running this script again using the `sudo` command.")
             self.destroy()
-            quit()
+            sys.exit()
 
         self.mainloop()
 
