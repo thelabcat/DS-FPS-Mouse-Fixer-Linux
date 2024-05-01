@@ -7,7 +7,7 @@ Currently written mousefixes:
 Support for other games is possible, but isn't planned at current. Request a game, or write a mousefix and create a pull request yourself if you want.
 
 ## Requirements:
-This program is tested and working with Python 3.12 on Fedora 39 and Windows 11, x86 64.
+This program is tested and working with Python 3.12 on Fedora 39 and Windows 11, x86 64. It requires Python >= 3.9, possibly greater.
 To run from source, install Python 3.x, and the following Python libraries. If on Linux, they must be where root can see them. To achieve that, I ran Pip (Python's package installer) as root, even though it's not recommended.
 - [PyAutoGUI](https://pypi.org/project/PyAutoGUI/)
 - [Pillow](https://pypi.org/project/pillow/)
