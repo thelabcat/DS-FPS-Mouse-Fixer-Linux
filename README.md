@@ -1,4 +1,4 @@
-# Nintendo DS FPS Mouse Fixer for Linux
+# Nintendo DS FPS Mouse Fixer for Linux AND Windows, with Boost Ball support and Auto-Pausing features
 A Python-based cross-platform port of https://github.com/JDoe212/DS-FPS-Mouse-Fixer with some quality of life improvements.
 Currently written mousefixes:
 - Metroid Prime Hunters
