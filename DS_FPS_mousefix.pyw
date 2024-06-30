@@ -217,12 +217,14 @@ class MousefixBase(threading.Thread):
         """Put down the mouse button, pausing the recording as necessary"""
         self.pause_mouse_rec()
         pyautogui.mouseDown(*args, **kwargs)
+        time.sleep(CONFIG["mouseRecordResumeWait"])
         self.start_mouse_rec()
 
     def mouse_up(self, *args, **kwargs):
         """Lift up the mouse button, pausing the recording as necessary"""
         self.pause_mouse_rec()
         pyautogui.mouseUp(*args, **kwargs)
+        time.sleep(CONFIG["mouseRecordResumeWait"])
         self.start_mouse_rec()
 
     def zoom_out(self, e):

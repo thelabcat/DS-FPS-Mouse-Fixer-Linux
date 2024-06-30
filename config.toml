@@ -1,6 +1,7 @@
 mouseResetWait = 0.035 #pertains to the time before the mouse moves again, adjust this if your camera keeps jerking when your cursor is reset to center.
 buttonWait = 0.120 #pertains to the time before the mouse moves after pressing a button, adjust this if you get ghost inputs [buttons not properly pressed].
 keyWait = 0.050 #pertains to the time between key inputs, this is used for some macros such as sprinting and crouching in the COD Games, adjust this if those inputs are not caught.
+mouseRecordResumeWait = 0.050 #Time between sending a fake mouse event and resuming the event recorder, so the recorder does not catch the fake event
 hudCheckInterval = 1 #How often to check if Samus's HUD is shown
 pauseInterval = 0.1 #How often to run the pause loop
 buttonHoldInterval = 0.05 #How often to rerun the mouse movement command to keep the cursor locked onto a button
