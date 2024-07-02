@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
-#Nintendo DS FPS mousefix for linux - main GUI
-#S.D.G.
+"""Nintendo DS FPS mousefix for linux - main GUI
+Choose and launch a mousefix. This module also provides the MousefixBase class.
 
-import mouse
-import keyboard
-import pyautogui #For HUD detection and working around faults in the mouse and keyboard modules
-import time
+S.D.G."""
+
+import getpass
+import glob
+import os
+import platform
 import queue
+import sys
 import threading
+import time
 import tkinter as tk
 from tkinter import messagebox as mb
-import os
-import getpass
-import platform
-import glob
 import tomllib
-import sys
+import keyboard
+import mouse
+import pyautogui #For HUD detection and working around faults in the mouse and keyboard modules
 
 #Disable all delays in pyautogui
 pyautogui.MINIMUM_DURATION=0
@@ -24,6 +26,9 @@ pyautogui.PAUSE=0
 
 #Disable failsafe that kills the program if the mouse goes into the corner of the screen, as this can be a problem in fullscreen emulators
 pyautogui.FAILSAFE=False
+
+#Text encoding to use when opening files
+DEFAULT_ENCODING = "utf-8"
 
 OP_PATH = __file__[:__file__.rfind(os.sep)]
 CONFIG_PATH = "config.toml"
@@ -36,9 +41,10 @@ def distance(vec1, vec2):
     """Find pythagorean distance between two iterable vectors"""
     if len(vec1) != len(vec2):
         raise ValueError("Vectors cannot have different number of axes")
-    return sum([x ** 2 for x in [vec2[i] - vec1[i] for i in range(len(vec1))]]) ** 0.5
+    return sum((a1 - a2) ** 2 for a1, a2 in zip(vec1, vec2)) ** 0.5
 
 class MousefixBase(threading.Thread):
+    """Abstract class for mouse fixes"""
     config = "default"
 
     def __init__(self, use_hud_detect = True, host_gui = None):
@@ -46,6 +52,18 @@ class MousefixBase(threading.Thread):
         super().__init__()
         self.use_hud_detect = use_hud_detect #Use HUD detection for auto-pausing and such
         self.host_gui = host_gui #Host GUI
+
+        self.last_hudcheck = 0 #Time of last HUD check
+        self.was_hud = True #Was HUD last time we checked
+        self.is_hud = True #Is hud on this check
+        self.manual_paused = False
+
+        self.keyevents = queue.Queue()
+        self.mouseevents = queue.Queue()
+
+        self.touch_size = 0, 0
+        self.touch_offset = 0, 0
+        self.running = False
 
     def __getitem__(self, key):
         """Get config for this mousefix, or reset to default"""
@@ -67,10 +85,10 @@ class MousefixBase(threading.Thread):
     def get_touch_area(self):
         """Get the initial touch area and return touch_offset and touch_size"""
         print("Click opposite corners of the touch area.")
-        mouse.wait(target_types=("down"))
+        mouse.wait(target_types = "down")
         p1=mouse.get_position()
         print(p1)
-        mouse.wait(target_types=("down"))
+        mouse.wait(target_types = "down")
         p2=mouse.get_position()
         print(p2)
         touch_offset = min((p1[0], p2[0])), min((p1[1], p2[1]))
@@ -104,20 +122,18 @@ class MousefixBase(threading.Thread):
         """Start the program"""
         self.running = True
         self.touch_offset, self.touch_size = self.get_touch_area()
+
         keyboard.add_hotkey(CONFIG["killKey"], self.kill) #Kill the program when this key is pressed, no matter what
 
-        self.keyevents=keyboard.start_recording()[0] #Get a keyboard events queue
+        print("Starting input event recorders")
+        self.keyevents = keyboard.start_recording()[0] #Get a keyboard events queue
 
-        self.mouseevents=queue.Queue()
         self.start_mouse_rec() #Start recording mouse events
 
+        print("Moving mouse to center of play area")
         self.reset_mouse()
 
-        self.last_hudcheck = 0 #Time of last HUD check
-        self.was_hud = True #Was HUD last time we checked
-        self.is_hud = True #Is hud on this check
-        self.manual_paused = False
-
+        print("Starting mainloop")
         while self.running:
             if self.manual_pause_handler(): #Handle any possible unpauses, delay if not unpaused
                 continue
@@ -157,7 +173,7 @@ class MousefixBase(threading.Thread):
                         exec("self."+self["keybinds"][e.name].lower()+"(e)")
 
                 elif e.name.isnumeric() and 0 < int(e.name) <= len(self["weaponSelectButtons"]): #Pressed a number key, is in range of weapons
-                    print("Weapon %i selected" % int(e.name))
+                    print(f"Weapon {e.name} selected")
                     self.weaponselect(int(e.name))
 
                 elif e.name == CONFIG["pauseKey"]: #Pause the mouse fix
@@ -168,7 +184,7 @@ class MousefixBase(threading.Thread):
 
             if not self.mouseevents.empty(): #Do not hold the loop waiting for a mouse event
                 e = self.mouseevents.get()
-                if type(e)==mouse.ButtonEvent and e.button in CONFIG["mousebinds"].keys():
+                if isinstance(e, mouse.ButtonEvent) and e.button in CONFIG["mousebinds"].keys():
                     exec("self."+CONFIG["mousebinds"][e.button]+"(e)") #Run one of our three mouse bound functions
 
             if platform.system() != "Linux" or not mouse.is_pressed(): #Give up wrap if mouse is actually held down on Linux
@@ -200,7 +216,7 @@ class MousefixBase(threading.Thread):
 
     def weaponselect(self, weapon):
         """Select a weapon by index"""
-        pass
+        print("No weapon select method defined.")
 
     def fire(self, e):
         """Fire the gun, or stop firing"""
@@ -278,7 +294,7 @@ class MousefixBase(threading.Thread):
         else:
             button_wait = CONFIG["buttonWait"]
 
-        for i in range(int(button_wait / CONFIG["buttonHoldInterval"])): #Lock the mouse onto the button by constantly moving back to it
+        for _ in range(int(button_wait / CONFIG["buttonHoldInterval"])): #Lock the mouse onto the button by constantly moving back to it
             time.sleep(CONFIG["buttonHoldInterval"])
             self.goto_relative(*button[0])
         time.sleep(button_wait % CONFIG["buttonHoldInterval"])
@@ -286,7 +302,7 @@ class MousefixBase(threading.Thread):
         if reset:
             self.reset_mouse()
 
-    def reset_mouse(self, e=None):
+    def reset_mouse(self, e = None):
         """Reset the mouse to the center position"""
         self.mouse_up()
         time.sleep(CONFIG["mouseResetWait"])
@@ -296,16 +312,17 @@ class MousefixBase(threading.Thread):
 #Load and register the mousefixes
 mousefix_registry = {}
 for script_fn in glob.glob(MOUSEFIX_PATH + "*"):
-    script = open(script_fn)
-    exec(script.read())
+    with open(script_fn, encoding = DEFAULT_ENCODING) as script:
+        exec(script.read())
     mousefix_registry[name] = mousefix #Each mousefix must end with a name variable set to a pretty name string, and a mousefix variable set to the new mousefix class
 
 class MousefixWindow(tk.Tk):
+    """Window to choose and start a mousefix"""
     def __init__(self):
-        """Window to choose and start a mousefix"""
+        """Start the GUI"""
         super().__init__()
         self.title("DS FPS Mouse Fixer")
-        self.INFO_STRING = "Select a game from the menu, then press Start. You will have %i seconds to switch to the emulator window, before this window turns red, indicating the mousefix is active. Once it turns red, click two diagonal opposite corners of the stylus play area.\nREMINDER: %s pauses the mouse fix, %s kills it. Enjoy!\nS.D.G." % (CONFIG["startDelay"], CONFIG["pauseKey"], CONFIG["killKey"])
+        self.info_string = f"Select a game from the menu, then press Start. You will have {CONFIG["startDelay"]} seconds to switch to the emulator window, before this window turns red, indicating the mousefix is active. Once it turns red, click two diagonal opposite corners of the stylus play area.\nREMINDER: {CONFIG["pauseKey"]} pauses the mouse fix, {CONFIG["killKey"]} kills it. Enjoy!\nS.D.G."
 
         self.mousefix=None
         self.build()
@@ -349,7 +366,7 @@ class MousefixWindow(tk.Tk):
         #Additional help information display
         self.info_text = tk.Text(self.mainframe, wrap = "word")
         self.info_text.grid(row = 3, sticky = tk.NSEW)
-        self.info_text.insert(0.0, self.INFO_STRING)
+        self.info_text.insert(0.0, self.info_string)
         self.info_text.configure(state = "disabled")
         self.mainframe.rowconfigure(3, weight = 1)
 
